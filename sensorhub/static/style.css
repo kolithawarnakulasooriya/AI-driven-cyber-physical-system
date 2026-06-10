@@ -1,0 +1,201 @@
+:root {
+    --primary-color: #0d6efd;
+    --danger-color: #dc3545;
+    --success-color: #198754;
+    --dark-bg: #212529;
+}
+
+body {
+    background-color: #f8f9fa;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.navbar {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.mqtt-status {
+    display: flex;
+    gap: 10px;
+}
+
+.card {
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    transition: box-shadow 0.3s ease;
+}
+
+.card:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+.card-header {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #dee2e6;
+    border-radius: 8px 8px 0 0;
+    padding: 1.25rem;
+}
+
+.card-header h5 {
+    margin: 0;
+    color: var(--dark-bg);
+    font-weight: 600;
+}
+
+.sensor-card {
+    margin-bottom: 1.5rem;
+    border-left: 4px solid var(--primary-color);
+}
+
+.sensor-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.sensor-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin: 0;
+}
+
+.sensor-status-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+.sensor-status-badge.running {
+    background-color: #d1ecf1;
+    color: #0c5460;
+}
+
+.sensor-status-badge.stopped {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+.sensor-status-badge.recording {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.sensor-controls {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-bottom: 1rem;
+}
+
+.sensor-controls button {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.9rem;
+}
+
+.sensor-info {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1rem;
+    padding: 1rem;
+    background-color: #f8f9fa;
+    border-radius: 6px;
+}
+
+.info-item {
+    display: flex;
+    flex-direction: column;
+}
+
+.info-label {
+    font-size: 0.85rem;
+    color: #6c757d;
+    font-weight: 500;
+    margin-bottom: 0.3rem;
+}
+
+.info-value {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--dark-bg);
+}
+
+.chart-container {
+    position: relative;
+    height: 300px;
+    margin-bottom: 1rem;
+}
+
+.parameter-controls {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 0.8rem;
+    margin-bottom: 1rem;
+}
+
+.parameter-control {
+    display: flex;
+    flex-direction: column;
+}
+
+.parameter-control label {
+    font-size: 0.85rem;
+    color: #6c757d;
+    font-weight: 500;
+    margin-bottom: 0.3rem;
+}
+
+.parameter-control input {
+    padding: 0.4rem 0.6rem;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    font-size: 0.9rem;
+}
+
+.delete-btn {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.85rem;
+    background-color: var(--danger-color);
+    border: none;
+}
+
+.delete-btn:hover {
+    background-color: #c82333;
+}
+
+#sensors-container {
+    display: grid;
+    gap: 1.5rem;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 2rem;
+    color: #6c757d;
+}
+
+.empty-state p {
+    margin: 0;
+    font-size: 1.1rem;
+}
+
+@media (max-width: 768px) {
+    .sensor-controls {
+        flex-direction: column;
+    }
+
+    .sensor-controls button {
+        width: 100%;
+    }
+
+    .parameter-controls {
+        grid-template-columns: 1fr;
+    }
+
+    .sensor-info {
+        grid-template-columns: 1fr;
+    }
+}

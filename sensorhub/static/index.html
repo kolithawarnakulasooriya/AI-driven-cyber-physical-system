@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sensor Simulation Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/static/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+</head>
+<body>
+    <div class="container-fluid">
+        <nav class="navbar navbar-dark bg-dark mb-4">
+            <div class="container-fluid">
+                <span class="navbar-brand mb-0 h1">📊 Sensor Simulation Dashboard</span>
+                <div class="mqtt-status">
+                    <span id="mqtt-indicator" class="badge bg-danger">MQTT: Disconnected</span>
+                </div>
+            </div>
+        </nav>
+
+        <div class="container-fluid">
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5>Add New Sensor</h5>
+                        </div>
+                        <div class="card-body">
+                            <form id="add-sensor-form">
+                                <div class="mb-3">
+                                    <label class="form-label">Sensor Name</label>
+                                    <input type="text" class="form-control" id="sensor-name" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Sensor Type</label>
+                                    <select class="form-select" id="sensor-type" required>
+                                        <option value="gaussian">Temperature/Humidity (Gaussian)</option>
+                                        <option value="wave">Pressure/Flow (Wave)</option>
+                                        <option value="random_walk">Energy/Power (Random Walk)</option>
+                                        <option value="lidar">LIDAR (Distance)</option>
+                                        <option value="custom">Custom Pattern</option>
+                                    </select>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Min Value</label>
+                                        <input type="number" class="form-control" id="min-value" value="0" step="0.1" required>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Max Value</label>
+                                        <input type="number" class="form-control" id="max-value" value="100" step="0.1" required>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Interval (seconds)</label>
+                                    <input type="number" class="form-control" id="interval" value="1" step="0.1" min="0.1" required>
+                                </div>
+                                <button type="submit" class="btn btn-primary w-100">Add Sensor</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5>MQTT Configuration</h5>
+                        </div>
+                        <div class="card-body">
+                            <form id="mqtt-config-form">
+                                <div class="mb-3">
+                                    <label class="form-label">Hostname</label>
+                                    <input type="text" class="form-control" id="mqtt-host" value="localhost">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Port</label>
+                                    <input type="number" class="form-control" id="mqtt-port" value="1883">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Topic Prefix</label>
+                                    <input type="text" class="form-control" id="mqtt-prefix" value="sensors">
+                                </div>
+                                <div class="d-grid gap-2">
+                                    <button type="button" class="btn btn-success" id="mqtt-connect-btn">Connect to MQTT</button>
+                                    <button type="button" class="btn btn-danger" id="mqtt-disconnect-btn">Disconnect MQTT</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5>Sensors</h5>
+                        </div>
+                        <div class="card-body">
+                            <div id="sensors-container"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/dashboard.js"></script>
+</body>
+</html>
