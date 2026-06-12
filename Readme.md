@@ -8,6 +8,22 @@ smart infrastructure applications.
 # Requirements
 - Python 3.9 or higher
 
+# Create Conda Envirnment
+
+We use conda environment for this project. You can install conda [Here](https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html)
+
+To create the environment
+
+```
+conda create --file environment.yml
+```
+
+To Activate the environment
+
+```
+conda activate ee506
+```
+
 # How to Run Sensorhub Simulator
 
 [Check the ReadMe file here](sensorhub/README.md)
