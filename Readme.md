@@ -7,3 +7,13 @@ smart infrastructure applications.
 
 # Requirements
 - Python 3.9 or higher
+
+# How to Run Sensorhub Simulator
+
+[Check the ReadMe file here](sensorhub/README.md)
+
+### Run the app
+
+```
+cd sensorhub && python -m uvicorn app:app --reload
+```
