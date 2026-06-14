@@ -1,0 +1,15 @@
+# Python cache
+__pycache__/
+*.pyc
+
+# Sensor persistence and runtime logs
+sensorhub/sensors.json
+sensorhub/server.log
+
+# Environment files
+.env
+.venv/
+venv/
+
+# OS files
+.DS_Store

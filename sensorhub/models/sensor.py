@@ -1,6 +1,6 @@
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import Optional, Dict, Any
+from typing import Dict, Any
 import uuid
 
 @dataclass
@@ -26,13 +26,32 @@ class SensorReading:
         }
 
 class Sensor:
-    def __init__(self, config: SensorConfig):
-        self.id = str(uuid.uuid4())
+    def __init__(self, config: SensorConfig, sensor_id: str = None):
+        self.id = sensor_id or str(uuid.uuid4())
         self.config = config
         self.is_running = False
         self.readings: list[SensorReading] = []
         self.recording = False
         self.current_value = (config.min_value + config.max_value) / 2
+
+    @classmethod
+    def from_dict(cls, data: Dict[str, Any]):
+        config = SensorConfig(
+            name=data["name"],
+            sensor_type=data["type"],
+            interval=data["interval"],
+            min_value=data["min_value"],
+            max_value=data["max_value"],
+            parameters=data.get("parameters", {})
+        )
+        sensor = cls(config, sensor_id=data.get("id"))
+        sensor.is_running = False
+        sensor.recording = False
+        sensor.current_value = data.get(
+            "current_value",
+            (config.min_value + config.max_value) / 2
+        )
+        return sensor
 
     def add_reading(self, value: float):
         reading = SensorReading(

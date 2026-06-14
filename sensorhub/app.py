@@ -14,6 +14,8 @@ from integrations.csv_recorder import CSVRecorder
 
 app = FastAPI(title="Sensor Simulation Dashboard")
 
+SENSOR_PERSISTENCE_FILE = os.path.join(os.path.dirname(__file__), "sensors.json")
+
 sensors: Dict[str, Sensor] = {}
 sensor_tasks: Dict[str, asyncio.Task] = {}
 mqtt_handler = MQTTHandler()
@@ -21,6 +23,30 @@ csv_recorder = CSVRecorder()
 websocket_clients: List[WebSocket] = []
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
+
+
+def load_sensors_from_file():
+    if not os.path.exists(SENSOR_PERSISTENCE_FILE):
+        return
+    try:
+        with open(SENSOR_PERSISTENCE_FILE, "r") as f:
+            data = json.load(f)
+        for sensor_data in data:
+            sensor = Sensor.from_dict(sensor_data)
+            sensors[sensor.id] = sensor
+    except Exception as e:
+        print(f"Failed to load sensors from {SENSOR_PERSISTENCE_FILE}: {e}")
+
+
+def save_sensors_to_file():
+    try:
+        with open(SENSOR_PERSISTENCE_FILE, "w") as f:
+            json.dump([sensor.to_dict() for sensor in sensors.values()], f, indent=2)
+    except Exception as e:
+        print(f"Failed to save sensors to {SENSOR_PERSISTENCE_FILE}: {e}")
+
+
+load_sensors_from_file()
 
 
 @app.get("/", response_class=HTMLResponse)
@@ -42,6 +68,7 @@ async def create_sensor(config: dict):
         )
         sensor = Sensor(sensor_config)
         sensors[sensor.id] = sensor
+        save_sensors_to_file()
 
         await broadcast_message({
             "type": "sensor_created",
@@ -64,6 +91,7 @@ async def delete_sensor(sensor_id: str):
 
     csv_recorder.stop_recording(sensor_id)
     del sensors[sensor_id]
+    save_sensors_to_file()
 
     await broadcast_message({
         "type": "sensor_deleted",
@@ -125,6 +153,7 @@ async def update_sensor_config(sensor_id: str, updates: dict):
     if "parameters" in updates:
         sensor.config.parameters.update(updates["parameters"])
 
+    save_sensors_to_file()
     await broadcast_message({
         "type": "sensor_config_updated",
         "data": sensor.to_dict()

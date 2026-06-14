@@ -111,6 +111,14 @@ function createSensorCard(sensor, sensorId) {
     const statusBadge = sensor.is_running ? "running" : "stopped";
     const statusText = sensor.is_running ? "🔴 Running" : "⚪ Stopped";
 
+    const parameterInfo = sensor.parameters && Object.keys(sensor.parameters).length > 0
+        ? Object.entries(sensor.parameters).map(([key, value]) => `
+                <div class="info-item">
+                    <span class="info-label">${toTitleCase(key)}</span>
+                    <span class="info-value">${parseFloat(value).toFixed(2)}</span>
+                </div>`).join("")
+        : "";
+
     card.innerHTML = `
         <div class="card-body">
             <div class="sensor-header">
@@ -144,6 +152,7 @@ function createSensorCard(sensor, sensorId) {
                     <span class="info-label">Interval</span>
                     <span class="info-value">${sensor.interval}s</span>
                 </div>
+                ${parameterInfo}
             </div>
 
             <div class="parameter-controls">
@@ -270,6 +279,10 @@ async function updateInterval(sensorId, interval) {
     });
 }
 
+function toTitleCase(text) {
+    return text.replace(/_/g, " ").replace(/\w\S*/g, (txt) => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase());
+}
+
 function updateMQTTStatus(connected) {
     const indicator = document.getElementById("mqtt-indicator");
     if (connected) {
@@ -281,17 +294,34 @@ function updateMQTTStatus(connected) {
     }
 }
 
+document.getElementById("sensor-type").addEventListener("change", () => {
+    const customFields = document.querySelector(".custom-sensor-params");
+    if (document.getElementById("sensor-type").value === "custom") {
+        customFields.classList.remove("d-none");
+    } else {
+        customFields.classList.add("d-none");
+    }
+});
+
 document.getElementById("add-sensor-form").addEventListener("submit", async (e) => {
     e.preventDefault();
 
+    const sensorType = document.getElementById("sensor-type").value;
     const sensorData = {
         name: document.getElementById("sensor-name").value,
-        sensor_type: document.getElementById("sensor-type").value,
+        sensor_type: sensorType,
         min_value: parseFloat(document.getElementById("min-value").value),
         max_value: parseFloat(document.getElementById("max-value").value),
         interval: parseFloat(document.getElementById("interval").value),
         parameters: {}
     };
+
+    if (sensorType === "custom") {
+        sensorData.parameters = {
+            actual_value: parseFloat(document.getElementById("actual-value").value),
+            tolerance: parseFloat(document.getElementById("tolerance").value)
+        };
+    }
 
     const response = await fetch("/api/sensors", {
         method: "POST",
@@ -301,6 +331,7 @@ document.getElementById("add-sensor-form").addEventListener("submit", async (e) 
 
     if (response.ok) {
         document.getElementById("add-sensor-form").reset();
+        document.querySelector(".custom-sensor-params").classList.add("d-none");
     }
 });
 
