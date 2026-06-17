@@ -24,6 +24,12 @@ To Activate the environment
 conda activate ee506
 ```
 
+### Update Conda Env File
+
+```
+conda env export --no-builds --format=environment-yaml | grep -v "^prefix: " > environment.yml
+```
+
 # How to Run Sensorhub Simulator
 
 [Check the ReadMe file here](sensorhub/README.md)
