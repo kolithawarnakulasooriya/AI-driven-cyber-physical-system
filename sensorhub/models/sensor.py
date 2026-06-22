@@ -16,12 +16,14 @@ class SensorConfig:
 class SensorReading:
     sensor_id: str
     value: float
+    actual_value: float
     timestamp: datetime
 
     def to_dict(self):
         return {
             "sensor_id": self.sensor_id,
             "value": self.value,
+            "actual_value": self.actual_value,
             "timestamp": self.timestamp.isoformat()
         }
 
@@ -53,10 +55,14 @@ class Sensor:
         )
         return sensor
 
-    def add_reading(self, value: float):
+    def add_reading(self, value: float, actual_value: float = None):
+        if actual_value is None:
+            actual_value = value
+
         reading = SensorReading(
             sensor_id=self.id,
             value=value,
+            actual_value=actual_value,
             timestamp=datetime.now()
         )
         self.readings.append(reading)

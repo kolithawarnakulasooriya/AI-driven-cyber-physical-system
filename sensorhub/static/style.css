@@ -141,6 +141,24 @@ body {
     flex-direction: column;
 }
 
+.custom-controls .parameter-control {
+    min-width: 220px;
+}
+
+.slider-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 0.4rem;
+    font-size: 0.9rem;
+    color: #495057;
+}
+
+.apply-range-btn {
+    align-self: flex-start;
+    margin-top: 1.4rem;
+}
+
 .parameter-control label {
     font-size: 0.85rem;
     color: #6c757d;
