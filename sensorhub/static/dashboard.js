@@ -119,6 +119,51 @@ function createSensorCard(sensor, sensorId) {
                 </div>`).join("")
         : "";
 
+    const customControls = sensor.type === "custom" ? `
+            <div class="parameter-controls custom-controls">
+                <div class="parameter-control">
+                    <label>Actual Value</label>
+                    <input type="range" class="form-range actual-slider" data-sensor-id="${sensorId}"
+                        min="${sensor.min_value}" max="${sensor.max_value}" step="0.1"
+                        value="${sensor.parameters.actual_value ?? ((sensor.min_value + sensor.max_value) / 2)}">
+                    <div class="slider-meta">
+                        <span class="slider-label">Value:</span>
+                        <span class="slider-value actual-value-display">${parseFloat(sensor.parameters.actual_value ?? ((sensor.min_value + sensor.max_value) / 2)).toFixed(2)}</span>
+                    </div>
+                </div>
+                <div class="parameter-control">
+                    <label>Tolerance (std dev)</label>
+                    <input type="range" class="form-range tolerance-slider" data-sensor-id="${sensorId}"
+                        min="0" max="${((sensor.max_value - sensor.min_value) / 2).toFixed(2)}" step="0.1"
+                        value="${sensor.parameters.tolerance ?? (((sensor.max_value - sensor.min_value) / 2) / 2)}">
+                    <div class="slider-meta">
+                        <span class="slider-label">Value:</span>
+                        <span class="slider-value tolerance-value-display">${parseFloat(sensor.parameters.tolerance ?? (((sensor.max_value - sensor.min_value) / 2) / 2)).toFixed(2)}</span>
+                    </div>
+                </div>
+                <div class="parameter-control">
+                    <label>Min Value</label>
+                    <input type="number" class="form-control range-input min-input" data-sensor-id="${sensorId}" value="${sensor.min_value}" step="0.1">
+                </div>
+                <div class="parameter-control">
+                    <label>Max Value</label>
+                    <input type="number" class="form-control range-input max-input" data-sensor-id="${sensorId}" value="${sensor.max_value}" step="0.1">
+                </div>
+                <div class="parameter-control">
+                    <label>Interval (seconds)</label>
+                    <input type="number" class="form-control interval-input" data-sensor-id="${sensorId}" value="${sensor.interval}" min="0.1" step="0.1">
+                </div>
+                <button type="button" class="btn btn-sm btn-outline-primary apply-range-btn d-none" data-sensor-id="${sensorId}">Save Range</button>
+            </div>
+        ` : `
+            <div class="parameter-controls">
+                <div class="parameter-control">
+                    <label>Interval (seconds)</label>
+                    <input type="number" class="form-control interval-input" data-sensor-id="${sensorId}" value="${sensor.interval}" min="0.1" step="0.1">
+                </div>
+            </div>
+        `;
+
     card.innerHTML = `
         <div class="card-body">
             <div class="sensor-header">
@@ -142,11 +187,11 @@ function createSensorCard(sensor, sensorId) {
                 </div>
                 <div class="info-item">
                     <span class="info-label">Current Value</span>
-                    <span class="info-value">${sensor.current_value.toFixed(2)}</span>
+                    <span class="info-value current-value" data-sensor-id="${sensorId}">${sensor.current_value.toFixed(2)}</span>
                 </div>
                 <div class="info-item">
                     <span class="info-label">Range</span>
-                    <span class="info-value">${sensor.min_value.toFixed(1)} - ${sensor.max_value.toFixed(1)}</span>
+                    <span class="info-value range-value" data-sensor-id="${sensorId}">${sensor.min_value.toFixed(1)} - ${sensor.max_value.toFixed(1)}</span>
                 </div>
                 <div class="info-item">
                     <span class="info-label">Interval</span>
@@ -155,12 +200,7 @@ function createSensorCard(sensor, sensorId) {
                 ${parameterInfo}
             </div>
 
-            <div class="parameter-controls">
-                <div class="parameter-control">
-                    <label>Interval (seconds)</label>
-                    <input type="number" class="interval-input" data-sensor-id="${sensorId}" value="${sensor.interval}" min="0.1" step="0.1">
-                </div>
-            </div>
+            ${customControls}
 
             <div class="chart-container">
                 <canvas id="chart-${sensorId}"></canvas>
@@ -172,7 +212,69 @@ function createSensorCard(sensor, sensorId) {
     card.querySelector(".stop-btn").addEventListener("click", () => stopSensor(sensorId));
     card.querySelector(".delete-btn").addEventListener("click", () => deleteSensor(sensorId));
     card.querySelector(".record-btn").addEventListener("click", () => toggleRecording(sensorId));
-    card.querySelector(".interval-input").addEventListener("change", (e) => updateInterval(sensorId, e.target.value));
+
+    const intervalInput = card.querySelector(".interval-input");
+    if (intervalInput) {
+        intervalInput.addEventListener("change", (e) => updateInterval(sensorId, e.target.value));
+    }
+
+    if (sensor.type === "custom") {
+        const actualSlider = card.querySelector(".actual-slider");
+        const toleranceSlider = card.querySelector(".tolerance-slider");
+        const actualDisplay = card.querySelector(".actual-value-display");
+        const toleranceDisplay = card.querySelector(".tolerance-value-display");
+        const minInput = card.querySelector(".min-input");
+        const maxInput = card.querySelector(".max-input");
+        const applyBtn = card.querySelector(".apply-range-btn");
+
+        const updateSliderLimits = () => {
+            const minValue = parseFloat(minInput.value);
+            const maxValue = parseFloat(maxInput.value);
+            const maxTolerance = Math.max(0, (maxValue - minValue) / 2);
+
+            actualSlider.min = minValue;
+            actualSlider.max = maxValue;
+            actualSlider.value = Math.min(maxValue, Math.max(minValue, parseFloat(actualSlider.value)));
+            actualDisplay.textContent = parseFloat(actualSlider.value).toFixed(2);
+
+            toleranceSlider.max = maxTolerance.toFixed(2);
+            toleranceSlider.value = Math.min(maxTolerance, parseFloat(toleranceSlider.value));
+            toleranceDisplay.textContent = parseFloat(toleranceSlider.value).toFixed(2);
+        };
+
+        updateSliderLimits();
+
+        const showApplyButton = () => applyBtn.classList.remove("d-none");
+
+        const debouncedConfigUpdate = debounce((id, updates) => updateSensorConfig(id, updates), 150);
+
+        actualSlider.addEventListener("input", (e) => {
+            actualDisplay.textContent = parseFloat(e.target.value).toFixed(2);
+            debouncedConfigUpdate(sensorId, { parameters: { actual_value: parseFloat(e.target.value) } });
+        });
+
+        toleranceSlider.addEventListener("input", (e) => {
+            toleranceDisplay.textContent = parseFloat(e.target.value).toFixed(2);
+            debouncedConfigUpdate(sensorId, { parameters: { tolerance: parseFloat(e.target.value) } });
+        });
+
+        minInput.addEventListener("input", showApplyButton);
+        maxInput.addEventListener("input", showApplyButton);
+
+        applyBtn.addEventListener("click", () => {
+            const minValue = parseFloat(minInput.value);
+            const maxValue = parseFloat(maxInput.value);
+            if (minValue >= maxValue) {
+                alert("Min value must be smaller than max value.");
+                return;
+            }
+            updateSensorConfig(sensorId, {
+                min_value: minValue,
+                max_value: maxValue
+            });
+            applyBtn.classList.add("d-none");
+        });
+    }
 
     // Create chart after a small delay to ensure DOM is ready
     setTimeout(() => createChart(sensorId, sensor), 100);
@@ -233,6 +335,12 @@ function updateChart(sensorId) {
     const chart = charts.get(sensorId);
     if (!chart) return;
 
+    const sensor = sensors.get(sensorId);
+    if (sensor) {
+        chart.options.scales.y.min = sensor.min_value;
+        chart.options.scales.y.max = sensor.max_value;
+    }
+
     const dataPoints = sensorDataPoints.get(sensorId);
     const labels = dataPoints.map((_, idx) => idx.toString());
     const values = dataPoints.map(d => d.value);
@@ -244,7 +352,16 @@ function updateChart(sensorId) {
 
 function updateSensorInfo(sensorId) {
     const sensor = sensors.get(sensorId);
-    const infoItems = document.querySelectorAll(`[data-sensor-id="${sensorId}"]`);
+    if (!sensor) return;
+
+    const valueNode = document.querySelector(`.current-value[data-sensor-id="${sensorId}"]`);
+    const rangeNode = document.querySelector(`.range-value[data-sensor-id="${sensorId}"]`);
+    if (valueNode) {
+        valueNode.textContent = sensor.current_value.toFixed(2);
+    }
+    if (rangeNode) {
+        rangeNode.textContent = `${sensor.min_value.toFixed(1)} - ${sensor.max_value.toFixed(1)}`;
+    }
 }
 
 async function startSensor(sensorId) {
@@ -277,6 +394,22 @@ async function updateInterval(sensorId, interval) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ interval: parseFloat(interval) })
     });
+}
+
+async function updateSensorConfig(sensorId, updates) {
+    await fetch(`/api/sensors/${sensorId}/config`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updates)
+    });
+}
+
+function debounce(fn, delay) {
+    let timer;
+    return (...args) => {
+        clearTimeout(timer);
+        timer = setTimeout(() => fn(...args), delay);
+    };
 }
 
 function toTitleCase(text) {

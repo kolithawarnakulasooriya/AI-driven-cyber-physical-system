@@ -150,8 +150,39 @@ async def update_sensor_config(sensor_id: str, updates: dict):
 
     if "interval" in updates:
         sensor.config.interval = updates["interval"]
+
+    if "min_value" in updates or "max_value" in updates:
+        min_value = updates.get("min_value", sensor.config.min_value)
+        max_value = updates.get("max_value", sensor.config.max_value)
+        if min_value >= max_value:
+            raise HTTPException(status_code=400, detail="min_value must be less than max_value")
+        sensor.config.min_value = min_value
+        sensor.config.max_value = max_value
+
+        if "actual_value" in sensor.config.parameters:
+            actual = sensor.config.parameters.get("actual_value")
+            if actual is not None:
+                sensor.config.parameters["actual_value"] = max(min_value, min(max_value, float(actual)))
+
+        if "tolerance" in sensor.config.parameters:
+            tolerance = sensor.config.parameters.get("tolerance")
+            if tolerance is not None:
+                max_tolerance = (max_value - min_value) / 2
+                sensor.config.parameters["tolerance"] = min(max_tolerance, float(tolerance))
+
     if "parameters" in updates:
         sensor.config.parameters.update(updates["parameters"])
+        if sensor.config.sensor_type == "custom":
+            if "actual_value" in updates["parameters"]:
+                actual_value = float(updates["parameters"]["actual_value"])
+                sensor.config.parameters["actual_value"] = max(
+                    sensor.config.min_value,
+                    min(sensor.config.max_value, actual_value)
+                )
+            if "tolerance" in updates["parameters"]:
+                tolerance = float(updates["parameters"]["tolerance"])
+                max_tolerance = (sensor.config.max_value - sensor.config.min_value) / 2
+                sensor.config.parameters["tolerance"] = max(0.0, min(max_tolerance, tolerance))
 
     save_sensors_to_file()
     await broadcast_message({
@@ -240,18 +271,20 @@ async def get_sensors():
 
 
 async def generate_sensor_data(sensor_id: str):
-    sensor = sensors[sensor_id]
-    generator = get_generator(
-        sensor.config.sensor_type,
-        sensor.config.min_value,
-        sensor.config.max_value,
-        sensor.config.parameters
-    )
-
     try:
-        while sensor.is_running:
+        while True:
+            sensor = sensors[sensor_id]
+            generator = get_generator(
+                sensor.config.sensor_type,
+                sensor.config.min_value,
+                sensor.config.max_value,
+                sensor.config.parameters
+            )
+            if not sensor.is_running:
+                break
+
             value = generator.generate()
-            reading = sensor.add_reading(value)
+            reading = sensor.add_reading(value, sensor.config.parameters.get("actual_value"))
 
             if sensor.recording:
                 csv_recorder.write_reading(sensor_id, value, reading.timestamp)
