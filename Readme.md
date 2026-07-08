@@ -42,4 +42,4 @@ cd sensorhub && python -m uvicorn app:app --reload
 
 ### Presentations
 
-[1. Overview of AI-Driven CPS](presentations/cps-ai-intro.html)
+[1. Overview of AI-Driven CPS](https://html-preview.github.io/?url=https://github.com/kolithawarnakulasooriya/AI-driven-cyber-physical-system/blob/SpoofingAttack/presentations/cps-ai-intro.html)
