@@ -6,19 +6,55 @@ import json
 import numpy as np
 import pandas as pd
 
+class WebSocketClient:
+    def __init__(self, url, callback):
+        self.url = url
+        self.ws = None
+        self.callback = callback
+        self.thread = None
+
+    def start(self):
+        self.ws = websocket.WebSocketApp(
+            self.url,
+            on_open=self.on_open,
+            on_message=self.on_message,
+            on_error=self.on_error,
+            on_close=self.on_close,
+        )
+        self.thread = threading.Thread(target=self.ws.run_forever, daemon=True)
+        self.thread.start()
+
+    def close(self):
+        self.ws.close()
+
+    def kill(self):
+        self.thread.join(timeout=1)
+
+    def on_message(self, ws, message):
+        self.callback(ws, message)
+
+    def on_error(self, ws, error):
+        print("WebSocket error:", error)
+
+    def on_close(self, ws, close_status_code, close_msg):
+        print(f"WebSocket closed {close_msg}")
+
+    def on_open(self, ws):
+        print("WebSocket opened")
+
 class WebSocketCollector:
     def __init__(self, url, max_messages=50):
         self.url = url
         self.max_messages = max_messages
         self.queue = queue.Queue()
         self.received = 0
-        self.ws = None
+        self.client = WebSocketClient(self.url, self.on_message)
 
     def on_message(self, ws, message):
         self.queue.put(message)
         self.received += 1
         if self.received >= self.max_messages:
-            ws.close()
+            self.client.close()
 
     def on_error(self, ws, error):
         print("WebSocket error:", error)
@@ -30,20 +66,12 @@ class WebSocketCollector:
         print("WebSocket opened")
 
     def collect(self):
-        self.ws = websocket.WebSocketApp(
-            self.url,
-            on_open=self.on_open,
-            on_message=self.on_message,
-            on_error=self.on_error,
-            on_close=self.on_close,
-        )
-        thread = threading.Thread(target=self.ws.run_forever, daemon=True)
-        thread.start()
+        self.client.start()
 
         while self.received < self.max_messages:
             time.sleep(0.1)
 
-        thread.join(timeout=1)
+        self.client.kill()
         return self.queue
     
 
