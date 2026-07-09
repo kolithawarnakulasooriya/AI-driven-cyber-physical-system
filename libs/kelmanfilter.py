@@ -35,8 +35,14 @@ class KalmanFilter1D:
         kalman_gain = self.P / (self.P + self.R)
         self.x = self.x + kalman_gain * (z - self.x)
         self.P = (1 - kalman_gain) * self.P
-        
-    def filter(self, measurements):
+    
+    def filter(self, measurement: float):
+        """Apply Kalman filter to a single measurement"""
+        self.predict()
+        self.update(measurement)
+        return self.x
+
+    def filter(self, measurements: list):
         """Apply Kalman filter to a sequence of measurements"""
         self.estimates = []
         

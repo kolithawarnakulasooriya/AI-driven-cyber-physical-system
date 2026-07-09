@@ -39,3 +39,7 @@ conda env export --no-builds --format=environment-yaml | grep -v "^prefix: " > e
 ```
 cd sensorhub && python -m uvicorn app:app --reload
 ```
+
+### Presentations
+
+[1. Overview of AI-Driven CPS](https://html-preview.github.io/?url=https://github.com/kolithawarnakulasooriya/AI-driven-cyber-physical-system/blob/SpoofingAttack/presentations/cps-ai-intro.html)
