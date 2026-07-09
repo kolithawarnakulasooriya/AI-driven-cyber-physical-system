@@ -287,7 +287,7 @@ async def generate_sensor_data(sensor_id: str):
             reading = sensor.add_reading(value, sensor.config.parameters.get("actual_value"))
 
             if sensor.recording:
-                csv_recorder.write_reading(sensor_id, value, reading.timestamp)
+                csv_recorder.write_reading(sensor_id, reading.value, reading.actual_value, reading.timestamp)
 
             if mqtt_handler.is_connected():
                 mqtt_handler.publish(

@@ -16,7 +16,7 @@ class CSVRecorder:
 
         with open(filepath, 'w', newline='') as f:
             writer = csv.writer(f)
-            writer.writerow(['timestamp', 'value'])
+            writer.writerow(['timestamp', 'value', 'actual_value'])
 
         self.active_recorders[sensor_id] = {
             'filepath': filepath,
@@ -24,14 +24,14 @@ class CSVRecorder:
         }
         return filename
 
-    def write_reading(self, sensor_id: str, value: float, timestamp: datetime):
+    def write_reading(self, sensor_id: str, value: float, actual_value: float, timestamp: datetime):
         if sensor_id not in self.active_recorders:
             return
 
         filepath = self.active_recorders[sensor_id]['filepath']
         with open(filepath, 'a', newline='') as f:
             writer = csv.writer(f)
-            writer.writerow([timestamp.isoformat(), value])
+            writer.writerow([timestamp.isoformat(), value, actual_value])
 
     def stop_recording(self, sensor_id: str) -> Optional[str]:
         if sensor_id in self.active_recorders:
