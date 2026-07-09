@@ -7,6 +7,7 @@ import numpy as np
 import pandas as pd
 
 class WebSocketClient:
+    
     def __init__(self, url, callback):
         self.url = url
         self.ws = None
@@ -43,7 +44,7 @@ class WebSocketClient:
         print("WebSocket opened")
 
 class WebSocketCollector:
-    def __init__(self, url, max_messages=50):
+    def __init__(self, url:str, max_messages:int=50):
         self.url = url
         self.max_messages = max_messages
         self.queue = queue.Queue()
