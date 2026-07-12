@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kalman Filtering Presentation</title>
+    <!-- Reveal.js CSS Framework -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.5.0/reveal.min.css">
+    <!-- Premium Cyberpunk/Tech Theme -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.5.0/theme/black.min.css">
+
+    <!-- 3. Load the auto-render extension to process math text automatically -->
+    <script defer src="https://jsdelivr.net"></script>
+    <script defer src="https://jsdelivr.net" onload="renderMathInElement(document.body);"></script>
+    <style>
+        :root {
+            --r-background-color: #0b0f19;
+            --r-main-font: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            --r-heading-font: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            --r-heading-color: #00ffd2;
+            --r-link-color: #00ffd2;
+            --accent-blue: #0072ff;
+        }
+        .reveal .slides section {
+            text-align: left;
+            padding: 20px 40px;
+            box-sizing: border-box;
+        }
+        .reveal h1, .reveal h2, .reveal h3 {
+            text-transform: none;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+        .reveal h1 {
+            font-size: 2.8em;
+            background: linear-gradient(135deg, #00ffd2 0%, #0072ff 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 20px;
+        }
+        .reveal h2 {
+            border-bottom: 2px solid rgba(0, 255, 210, 0.2);
+            padding-bottom: 10px;
+            margin-bottom: 30px;
+        }
+        .reveal ul {
+            list-style-type: none;
+            padding-left: 0;
+            margin-left: 0;
+        }
+        .reveal ul li {
+            position: relative;
+            padding-left: 30px;
+            margin-bottom: 15px;
+            font-size: 0.85em;
+            line-height: 1.4;
+            color: #e2e8f0;
+        }
+        .reveal ul li::before {
+            content: "▹";
+            position: absolute;
+            left: 0;
+            color: #00ffd2;
+            font-weight: bold;
+        }
+        .reveal ul li ul {
+            margin-top: 10px;
+            margin-left: 10px;
+        }
+        .reveal ul li ul li::before {
+            content: "▪";
+            color: #0072ff;
+        }
+        .equation {
+            background: rgba(0, 114, 255, 0.1);
+            border-left: 4px solid #00ffd2;
+            padding: 20px;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            font-weight: 500;
+            font-size: 0.78em !important;
+            line-height: 1.5;
+            color: #00ffd2;
+            border-radius: 0 8px 8px 0;
+            margin: 20px 0;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            white-space: pre-wrap;
+        }
+        .image-placeholder {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px dashed rgba(0, 255, 210, 0.3);
+            padding: 20px;
+            color: #94a3b8;
+            font-style: italic;
+            font-size: 0.55em;
+            border-radius: 6px;
+            text-align: center;
+            margin-top: 20px;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
+            display: None;
+        }
+        .meta-container {
+            border-left: 3px solid #0072ff;
+            padding-left: 20px;
+            margin-top: 40px;
+        }
+        .meta-info {
+            color: #94a3b8;
+            font-size: 0.6em;
+            margin-bottom: 8px;
+        }
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            align-items: center;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="reveal">
+        <div class="slides">
+
+            <!-- Slide 1: Title Slide -->
+            <section data-background-color="#0b0f19">
+                <h1>Kalman Filtering</h1>
+                <div class="grid-2">
+                    <div class="meta-container">
+                        <div class="meta-info"><strong>Kolitha Warnakulasooriya</strong></div>
+                        <div class="meta-info">Department of Electrical and Computer Engineering</div>
+                        <div class="meta-info">University of South Alabama</div>
+                        <div class="meta-info" style="color: #00ffd2; font-weight: bold; margin-top: 15px;">AI Driven Cyber Physical Systems</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Slide 2: Bayes' Theorem -->
+            <section>
+                <h2>Bayes' Theorem</h2>
+                <ul>
+                    <li><strong>Conditional probability:</strong> Quantifies the likelihood of an event occurring relative to the occurrence of another linked event.</li>
+                    <li>Likelihood of Event A occurring where another event B has occurred:</li>
+                </ul>
+                <div class="equation">P(A given B) equals P(A and B) divided by P(B), where P(B) is greater than 0.</div>
+                <ul>
+                    <li><strong>Bayes' Theorem framework:</strong> Provides a systematic methodology to calculate posterior probabilities using prior tracking knowledge.</li>
+                </ul>
+                <div class="equation">P(A given B) times P(B) equals P(B given A) times P(A).<br>Therefore, P(A given B) equals P(B given A) times P(A) divided by P(B).</div>
+            </section>
+
+            <!-- Slide 3: Example -->
+            <section>
+                <h2>Sensor Probability Example</h2>
+                <ul>
+                    <li>Positioning sensor precision maintains an 80% baseline accuracy value. Trajectory turning variations display a static 50% baseline distribution.</li>
+                    <li>Evaluations target performance across distinct sensor observation profiles:</li>
+                    <ul>
+                        <li>P(left) = 0.5, P(right) = 0.5, Probability of sensor reading P(z)</li>
+                        <li>P(z = left | x = left) = 0.8, P(z = left | x = right) = 0.2</li>
+                        <li>P(z = left) = 0.8 * 0.5 + 0.2 * 0.5 = 0.5</li>
+                    </ul>
+                    <li>Derived system probability outputs:</li>
+                    <ul>
+                        <li><strong>Sensor = Left, Actual = Left:</strong> P(x = left | z = left) = 0.8 * 0.5 / 0.5 = 0.80 (80%)</li>
+                        <li><strong>Sensor = Left, Actual = Right:</strong> P(x = right | z = left) = 0.2 * 0.5 / 0.5 = 0.20 (20%)</li>
+                    </ul>
+                </ul>
+            </section>
+
+            <!-- Slide 4: What is state estimation? -->
+            <section>
+                <h2>What is State Estimation?</h2>
+                <div class="grid-2">
+                    <div>
+                        <ul>
+                            <li>Processes mathematical frameworks to extract deterministic parameters out of noisy sensor profiles.</li>
+                            <li>Relies upon a structured history of dynamic parameters:
+                                <ul>
+                                    <li>System State vector at time parameter t: x_t</li>
+                                    <li>Sensor Observation profiles at time parameter t: z_t</li>
+                                    <li>Control Input vectors at time parameter t: u_t</li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </div>
+                    <div>
+                        <ul>
+                            <li><strong>Sequential Event Order:</strong>
+                                <ul>
+                                    <li>1. A system control input u_t is initiated.</li>
+                                    <li>2. Structural system state variables transition to x_t.</li>
+                                    <li>3. A measurement observation validation z_t is acquired.</li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Slide 5: Markov Assumption -->
+            <section>
+                <h2>Markov Assumption</h2>
+                <ul>
+                    <li>Dynamic profiles assume event outcomes remain dependent solely on the immediately preceding systemic step:</li>
+                </ul>
+                <div class="equation">The current output depends only on the most recent previous state, not on the full history.</div>
+                <ul>
+                    <li>State transition evaluations ignore chronological historical variations, relying directly on immediate states and incoming inputs:</li>
+                </ul>
+                <div class="equation">The current state depends on the previous state and the latest control input.</div>
+                <ul>
+                    <li>Observation accuracy profiles depend directly on current target parameters:</li>
+                </ul>
+                <div class="equation">The current observation depends on the current state rather than on the full sequence of past states.</div>
+                <ul>
+                    <li><strong>Operational Constraints:</strong> Environment remains static; system error patterns are uncorrelated; transition structures are modeled perfectly.</li>
+                </ul>
+            </section>
+
+            
+
+            <!-- Slide 6: Gaussian Distributions -->
+            <section>
+                <h2>Gaussian Distributions</h2>
+                <div class="grid-2">
+                    <div>
+                        <ul>
+                            <li>Forms a symmetrical, continuous bell curve centered precisely around the calculated tracking mean.</li>
+                            <li><strong>Mean (mu):</strong> Identifies the central amplitude point or maximum likelihood peak within the curve.</li>
+                            <li><strong>Standard Deviation (sigma):</strong> Governs distribution width. Narrow contours signify high certainty; wide profiles show lower precision.</li>
+                        </ul>
+                        <div class="equation">The Gaussian distribution is a bell-shaped probability model described by a mean and a variance. Its density is centered around mu and controlled by sigma.</div>
+                    </div>
+                    <div class="image-placeholder">
+                        <strong>[Visual Representation]</strong><br>
+                        Bell curve demonstrating standard deviations: 68.26% variance matching mu +/- 1sigma, 95.44% variance matching mu +/- 2sigma, and 99.72% variance matching mu +/- 3sigma.
+                    </div>
+                </div>
+            </section>
+
+            <!-- Slide 7: Recursive Belief Equation -->
+            <section>
+                <h2>Recursive Belief Equation</h2>
+                <ul>
+                    <li>Maintains real-time recursive system updates across operations using historical belief (x), input commands (u), and active observations (z).</li>
+                </ul>
+                <div class="equation">Belief at time t is the normalized product of the current measurement likelihood and the belief propagated from the previous time step.</div>
+                <ul>
+                    <li><strong>Bayes Filter Phase Division:</strong>
+                        <ul>
+                            <li><strong>Prediction Phase:</strong> Formulates system expectation prior to integration of sensor telemetry.
+                                <div class="equation" style="margin: 5px 0;">Prediction step: propagate the previous belief through the motion model before adding the new observation.</div>
+                            </li>
+                            <li><strong>Correction Phase:</strong> Filters prediction parameters via incoming real-time sensor evaluations.
+                                <div class="equation" style="margin: 5px 0;">Correction step: update the predicted belief using the latest sensor measurement.</div>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+            </section>
+
+            <!-- Slide 8: 1D Kalman Filtering Intro -->
+            <section>
+                <h2>1D Kalman Filtering</h2>
+                <div class="grid-2">
+                    <div>
+                        <ul>
+                            <li>Isolates tracking procedures down to a single distinct scalar variable (e.g., position configuration along the linear x-axis).</li>
+                            <li>System coordinates approximate an individual target location at 10m with an uncertainty variance value of 1 square meter.</li>
+                            <li>Expressed mathematically via standard normal distribution parameters:</li>
+                        </ul>
+                        <div class="equation">Gaussian Belief = N(10, 1^2)</div>
+                    </div>
+                    <div>
+                        <div class="image-placeholder" style="margin-bottom: 10px;">
+                            <strong>[Visual Parameter Graph]</strong><br>
+                            Normal probability curve centered at x = 10 with peak density approaching 0.4.
+                        </div>
+                        <div class="image-placeholder">
+                            <strong>[Tracking Setup Diagram]</strong><br>
+                            A mobile robot tracking an individual standing 10 meters away.
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Slide 9: 1D Kalman Filtering - Prediction -->
+            <section>
+                <h2>1D Filtering: Prediction</h2>
+                <div class="grid-2">
+                    <div>
+                        <ul>
+                            <li>Sensor returns 500 measurements varying uniformly between 8m and 12m. If the target is stationary, the historical mean represents the actual value.</li>
+                            <li><strong>Dynamic Target Scenario:</strong> Target shifts tracking location with velocity parameters V = 15 m/s across time span T = 2s.</li>
+                            <li>System integration model: x_new = x_old + v*t</li>
+                            <li>Velocity deviation holds 0.7 uncertainty: N(15, 0.7^2)</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <ul>
+                            <li>Combining two independent Gaussian tracking contours:</li>
+                        </ul>
+                        <div class="equation">The predicted mean is the previous mean plus the motion term, giving 25. The predicted variance is the sum of the previous variance and the process variance, giving 1.49.</div>
+                        <ul>
+                            <li>Calculated forward prediction distribution state:</li>
+                        </ul>
+                        <div class="equation">The predicted state is approximately 25 with variance 1.49.</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Slide 10: 1D Kalman Filtering - Correction -->
+            <section>
+                <h2>1D Filtering: Correction</h2>
+                <div class="grid-2">
+                    <div>
+                        <ul>
+                            <li>Executes correction loops by cross-checking predicted configurations against active sensors.</li>
+                            <div class="equation">The correction step combines the predicted estimate with the latest sensor reading.</div>
+                            <li>A secondary validation profile identifies an object reading at 24m containing a variance factor of 0.4: N(24, 0.4)</li>
+                            <li>Fusing the operational profiles: N(24, 0.4) * N(25, 1.49)</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <div class="equation">The fused estimate is approximately 24.97 with variance 0.144, which is more confident than either source alone.</div>
+                        <div class="image-placeholder">
+                            <strong>[Fused Distribution Chart]</strong><br>
+                            Juxtaposition of three tracking lines: a broad 'Prior' curve at 25, a narrow 'Likelihood' curve at 24, and the resulting integrated 'Updated' curve peak standing narrowest between them.
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Slide 11: ND Kalman Filtering - Prediction Step -->
+            <section>
+                <h2>Multi-Dimensional Filtering</h2>
+                <h3>Prediction Phase</h3>
+                <ul>
+                    <li>Tracks multi-variable system vectors across dynamic operations: x_t = [position, velocity]</li>
+                    <li>State transitions project system coordinates forward through transition matrix parameter matrix A. Process tracking noise variables are isolated inside covariance matrix Q.</li>
+                    <li>State uncertainty calculations adjust across tracking iterations using the following multi-dimensional linear equations:</li>
+                </ul>
+                <div class="equation">The predicted state is obtained by applying the transition model to the previous state, and the predicted covariance is updated by adding process noise.</div>
+                <ul>
+                    <li>The system covariance framework is derived directly from state error matrix calculations:</li>
+                </ul>
+                <div class="equation">The covariance matrix captures the expected squared error of the state estimate.</div>
+            </section>
+
+            <!-- Slide 12: ND Kalman Filtering - Update Step -->
+            <section>
+                <h2>Multi-Dimensional Filtering</h2>
+                <h3>Update Phase</h3>
+                <ul>
+                    <li><strong>Measurement Residual (y_t):</strong> Mathematical deviation mapping actual sensor outputs directly against internal predictive physics matrices:</li>
+                </ul>
+                <div class="equation">The measurement residual is the difference between the observed value and the predicted measurement.</div>
+                <ul>
+                    <li><strong>Kalman Gain Matrix (K_t):</strong> Scale factor evaluating prediction model variance weights against inbound observation error matrix R:</li>
+                </ul>
+                <div class="equation">The Kalman gain balances the uncertainty of the prediction against the uncertainty of the measurement.</div>
+                <ul>
+                    <li>State and covariance matrices finalize via integrated innovation feedback equations:</li>
+                </ul>
+                <div class="equation">The updated state is the predicted state plus the gain times the residual, and the covariance is reduced accordingly.</div>
+            </section>
+
+        </div>
+    </div>
+
+    <!-- Reveal.js Engine Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.5.0/reveal.min.js"></script>
+    <script>
+        Reveal.initialize({
+            hash: true,
+            controls: true,
+            progress: true,
+            center: true,
+            transition: 'slide', // smooth sliding transitions
+            width: 1280,
+            height: 720,
+            margin: 0.1
+        });
+    </script>
+</body>
+</html>

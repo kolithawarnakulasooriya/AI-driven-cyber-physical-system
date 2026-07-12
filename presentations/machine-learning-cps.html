@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Machine Learning Slide Deck</title>
+    <style>
+        :root {
+            --bg-color: #0b132b;
+            --card-bg: #1c2541;
+            --text-main: #ffffff;
+            --text-muted: #afb3c1;
+            --accent-teal: #48cae4;
+            --accent-blue: #0077b6;
+            --font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--font-family);
+            background-color: #111;
+            color: var(--text-main);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px 20px;
+        }
+
+        .deck-container {
+            display: flex;
+            flex-direction: column;
+            gap: 40px;
+            width: 100%;
+            max-width: 1280px;
+        }
+
+        .slide {
+            width: 1280px;
+            height: 720px;
+            background-color: var(--bg-color);
+            position: relative;
+            overflow: hidden;
+            border-radius: 12px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 60px 80px;
+            flex-shrink: 0;
+        }
+
+        /* Slide Specific Layouts */
+        .slide-title-page {
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            background: linear-gradient(135deg, #0b132b 0%, #1c2541 100%);
+        }
+
+        .slide-title-page h1 {
+            font-size: 3.5rem;
+            color: var(--text-main);
+            margin-bottom: 20px;
+            font-weight: 700;
+        }
+
+        .slide-title-page h2 {
+            font-size: 1.8rem;
+            color: var(--accent-teal);
+            font-weight: 400;
+        }
+
+        .slide-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            border-bottom: 2px solid var(--card-bg);
+            padding-bottom: 20px;
+        }
+
+        .slide-header h2 {
+            font-size: 2.2rem;
+            color: var(--text-main);
+        }
+
+        .slide-header .slide-meta {
+            font-size: 1rem;
+            color: var(--accent-teal);
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .slide-content {
+            flex-grow: 1;
+            margin-top: 40px;
+            font-size: 1.2rem;
+            line-height: 1.6;
+            color: var(--text-muted);
+        }
+
+        /* Grid Layouts */
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            height: 100%;
+        }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 30px;
+            height: 100%;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            padding: 30px;
+            border-radius: 8px;
+            border-top: 4px solid var(--accent-teal);
+        }
+
+        .card h3 {
+            color: var(--text-main);
+            margin-bottom: 15px;
+            font-size: 1.4rem;
+        }
+
+        /* Math & Code Blocks */
+        .math-block {
+            background-color: #000814;
+            font-family: 'Courier New', Courier, monospace;
+            padding: 20px;
+            border-radius: 6px;
+            color: var(--accent-teal);
+            margin: 20px 0;
+            font-size: 1.3rem;
+            text-align: center;
+            border-left: 4px solid var(--accent-blue);
+        }
+
+        /* Lists */
+        ul {
+            list-style-position: inside;
+            margin-left: 10px;
+        }
+
+        li {
+            margin-bottom: 12px;
+        }
+
+        li strong {
+            color: var(--text-main);
+        }
+
+        /* Image Placeholder / Embed styling */
+        .slide-image-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            height: 100%;
+            min-height: 350px;
+            overflow: hidden;
+        }
+
+        .slide-image-container img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        .slide-footer {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9rem;
+            color: var(--card-bg);
+            border-top: 1px solid rgba(255,255,255,0.05);
+            padding-top: 15px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="deck-container">
+
+    <!-- SLIDE 1: Title -->
+    <div class="slide slide-title-page">
+        <h1>Introduction to Machine Learning</h1>
+        <h2>Foundations, Algorithms, and Practices</h2>
+    </div>
+
+    <!-- SLIDE 2: Traditional vs ML -->
+    <div class="slide">
+        <div class="slide-header">
+            <h2>The Paradigm Shift</h2>
+            <div class="slide-meta">Concept</div>
+        </div>
+        <div class="slide-content grid-2">
+            <div>
+                <p style="margin-bottom: 20px;"><strong>Traditional Programming</strong> relies on hardcoded rules. Developers write explicit instructions to process input data and generate outputs manually.</p>
+                <p><strong>Machine Learning</strong> reverses this framework. The system accepts both raw input data and expected historical outputs to dynamically construct its own operational logic and predictive rules.</p>
+            </div>
+            <div class="slide-image-container">
+                <img src="http://googleusercontent.com/image_collection/image_retrieval/4863458266252234072_0" alt="Traditional programming versus machine learning flowchart">
+            </div>
+        </div>
+        <div class="slide-footer">
+            <span>Machine Learning Foundations</span>
+            <span>Slide 2</span>
+        </div>
+    </div>
+
+    <!-- SLIDE 3: Neural Networks -->
+    <div class="slide">
+        <div class="slide-header">
+            <h2>Artificial Intelligence & Neural Networks</h2>
+            <div class="slide-meta">Architecture</div>
+        </div>
+        <div class="slide-content grid-2">
+            <div class="slide-image-container">
+                <img src="http://googleusercontent.com/image_collection/image_retrieval/8544999967140446922_0" alt="Artificial intelligence neural network digital brain illustration">
+            </div>
+            <div>
+                <p style="margin-bottom: 20px;">Modern architecture maps directly to core network principles:</p>
+                <ul>
+                    <li><strong>Layered Hierarchy:</strong> Information flows from input nodes through hidden computing elements to final outputs.</li>
+                    <li><strong>Feature Extraction:</strong> Deep layers systematically isolate abstract high-level structures from raw inputs.</li>
+                    <li><strong>Adaptive Optimization:</strong> Synaptic connections continuously refine their execution properties via backpropagation algorithms.</li>
+                </ul>
+            </div>
+        </div>
+        <div class="slide-footer">
+            <span>Machine Learning Foundations</span>
+            <span>Slide 3</span>
+        </div>
+    </div>
+
+    <!-- SLIDE 4: ML Categorization -->
+    <div class="slide">
+        <div class="slide-header">
+            <h2>Core Methodologies</h2>
+            <div class="slide-meta">Taxonomy</div>
+        </div>
+        <div class="slide-content grid-3">
+            <div class="card">
+                <h3>Supervised Learning</h3>
+                <p>Models train using completely labeled inputs. The objective centers on map creation to project new records into continuous numbers or target tags.</p>
+            </div>
+            <div class="card">
+                <h3>Unsupervised Learning</h3>
+                <p>Algorithms parse unlabeled datasets directly. The focus shifts toward finding hidden groupings, clustering profiles, or identifying baseline densities.</p>
+            </div>
+            <div class="card">
+                <h3>Reinforcement Learning</h3>
+                <p>Software agents interact with active spaces. They optimize operational policies sequentially via reward feedback routines over time.</p>
+            </div>
+        </div>
+        <div class="slide-footer">
+            <span>Machine Learning Foundations</span>
+            <span>Slide 4</span>
+        </div>
+    </div>
+
+    <!-- SLIDE 5: Linear Regression -->
+    <div class="slide">
+        <div class="slide-header">
+            <h2>Linear Regression Foundations</h2>
+            <div class="slide-meta">Supervised</div>
+        </div>
+        <div class="slide-content grid-2">
+            <div>
+                <p>Maps a direct continuous connection between independent input parameters and target output scores.</p>
+                <div class="math-block">
+                    y = w * x + b
+                </div>
+                <ul>
+                    <li><strong>y:</strong> Predicted target value</li>
+                    <li><strong>w:</strong> Calculated feature slope weights</li>
+                    <li><strong>x:</strong> Incoming baseline observations</li>
+                    <li><strong>b:</strong> Intercept offset parameter</li>
+                </ul>
+            </div>
+            <div class="slide-image-container">
+                <img src="http://googleusercontent.com/image_collection/image_retrieval/1511235199854431702_0" alt="Linear regression line graph best fit scattered data points">
+            </div>
+        </div>
+        <div class="slide-footer">
+            <span>Machine Learning Foundations</span>
+            <span>Slide 5</span>
+        </div>
+    </div>
+
+    <!-- SLIDE 6: Classification Overview -->
+    <div class="slide">
+        <div class="slide-header">
+            <h2>Classification Tasks</h2>
+            <div class="slide-meta">Supervised</div>
+        </div>
+        <div class="slide-content grid-2">
+            <div class="card">
+                <h3>Binary Split Tasks</h3>
+                <p>Divides entries cleanly into one of two choices. Examples include filtering email as spam or non-spam, or tagging diagnostics as positive or negative indicators.</p>
+            </div>
+            <div class="card">
+                <h3>Multiclass Categorization</h3>
+                <p>Assigns incoming data instances to exactly one bucket out of several discrete categories, like sorting vehicle records into cars, trucks, or motorcycles.</p>
+            </div>
+        </div>
+        <div class="slide-footer">
+            <span>Machine Learning Foundations</span>
+            <span>Slide 6</span>
+        </div>
+    </div>
+
+    <!-- SLIDE 7: Unsupervised Clustering -->
+    <div class="slide">
+        <div class="slide-header">
+            <h2>Clustering & Groups</h2>
+            <div class="slide-meta">Unsupervised</div>
+        </div>
+        <div class="slide-content">
+            <p style="margin-bottom: 30px;">Clustering gathers unlabeled data items together based on shared mathematical properties and geometric closeness.</p>
+            <div class="grid-2">
+                <div>
+                    <p><strong>K-Means Mechanics:</strong></p>
+                    <ul>
+                        <li>Places random center seeds inside space.</li>
+                        <li>Assigns records to their nearest center point.</li>
+                        <li>Recalculates group averages to adjust center points.</li>
+                        <li>Repeats assignments until positions stabilize.</li>
+                    </ul>
+                </div>
+                <div class="card" style="border-top-color: var(--accent-blue);">
+                    <h3>Primary Applications</h3>
+                    <ul>
+                        <li>Customer audience profiling profiles.</li>
+                        <li>Image pixel compression schemes.</li>
+                        <li>Server hardware anomaly detection routines.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="slide-footer">
+            <span>Machine Learning Foundations</span>
+            <span>Slide 7</span>
+        </div>
+    </div>
+
+    <!-- SLIDE 8: Evaluation Metrics -->
+    <div class="slide">
+        <div class="slide-header">
+            <h2>Model Evaluation Performance Metrics</h2>
+            <div class="slide-meta">Validation</div>
+        </div>
+        <div class="slide-content grid-2">
+            <div>
+                <h3>Regression Analytics</h3>
+                <div class="math-block">
+                    MSE = (1/n) * Σ(y_i - ŷ_i)²
+                </div>
+                <p>Mean Squared Error measures structural deviation by calculating average squared distances between true targets and predicted parameters.</p>
+            </div>
+            <div>
+                <h3>Classification Evaluations</h3>
+                <ul>
+                    <li><strong>Accuracy:</strong> Percentage of accurate predictions relative to total dataset counts.</li>
+                    <li><strong>Precision:</strong> Exactness tracking across active true positive assignments.</li>
+                    <li><strong>Recall:</strong> System sensitivity finding target historical parameters correctly.</li>
+                </ul>
+            </div>
+        </div>
+        <div class="slide-footer">
+            <span>Machine Learning Foundations</span>
+            <span>Slide 8</span>
+        </div>
+    </div>
+
+    <!-- SLIDE 9: Cross Validation -->
+    <div class="slide">
+        <div class="slide-header">
+            <h2>K-Fold Cross-Validation</h2>
+            <div class="slide-meta">Validation</div>
+        </div>
+        <div class="slide-content grid-2">
+            <div class="slide-image-container">
+                <img src="http://googleusercontent.com/image_collection/image_retrieval/16155875087953127358_0" alt="k-fold cross validation machine learning schematic diagram">
+            </div>
+            <div>
+                <p style="margin-bottom: 15px;">Guarantees clean generalizations across metrics by cycling samples effectively:</p>
+                <ul>
+                    <li>Splits processing records into K balanced pools.</li>
+                    <li>Rotates which individual pool serves as the testing set.</li>
+                    <li>Trains model parameters using all remaining blocks.</li>
+                    <li>Averages validation marks across runs for final marks.</li>
+                </ul>
+            </div>
+        </div>
+        <div class="slide-footer">
+            <span>Machine Learning Foundations</span>
+            <span>Slide 9</span>
+        </div>
+    </div>
+
+    <!-- SLIDE 10: Overfitting vs Underfitting -->
+    <div class="slide">
+        <div class="slide-header">
+            <h2>Generalization Challenges</h2>
+            <div class="slide-meta">Optimization</div>
+        </div>
+        <div class="slide-content grid-2">
+            <div class="card" style="border-top-color: #ff4d6d;">
+                <h3>Overfitting</h3>
+                <p>The algorithm captures training data noise instead of clean patterns. Training metrics look excellent, but performance drops sharply on unseen evaluation files.</p>
+            </div>
+            <div class="card" style="border-top-color: #ffb703;">
+                <h3>Underfitting</h3>
+                <p>The model structure lacks the complexity needed to map underlying relationships. Both initial training and validation checks show poor accuracy scores.</p>
+            </div>
+        </div>
+        <div class="slide-footer">
+            <span>Machine Learning Foundations</span>
+            <span>Slide 10</span>
+        </div>
+    </div>
+
+    <!-- SLIDE 11: Deployment Workflow -->
+    <div class="slide">
+        <div class="slide-header">
+            <h2>The ML Lifecycle</h2>
+            <div class="slide-meta">Production</div>
+        </div>
+        <div class="slide-content">
+            <div class="grid-3" style="margin-top: 20px;">
+                <div class="card">
+                    <h3>1. Prep Phase</h3>
+                    <p>Engineers clean raw source records, fill in missing values, normalize features, and split operational splits securely.</p>
+                </div>
+                <div class="card">
+                    <h3>2. Training Loops</h3>
+                    <p>Systems run configurations, tune hyperparameter options, and evaluate loss values until validations cross quality targets.</p>
+                </div>
+                <div class="card">
+                    <h3>3. Production</h3>
+                    <p>Teams package verified assets into active API microservices, monitor real-world accuracy, and track performance drift.</p>
+                </div>
+            </div>
+        </div>
+        <div class="slide-footer">
+            <span>Machine Learning Foundations</span>
+            <span>Slide 11</span>
+        </div>
+    </div>
+
+    <!-- SLIDE 12: Future Horizons -->
+    <div class="slide">
+        <div class="slide-header">
+            <h2>Future Trajectories</h2>
+            <div class="slide-meta">Outlook</div>
+        </div>
+        <div class="slide-content">
+            <ul style="font-size: 1.4rem; line-height: 2;">
+                <li><strong>Edge Computing Deployment:</strong> Migrating inference systems directly onto power-constrained hardware and mobile nodes.</li>
+                <li><strong>Explainable AI Frameworks (XAI):</strong> Developing debugging layers to demystify complex neural network outputs.</li>
+                <li><strong>Automated Pipeline Engineering:</strong> Scaling algorithmic model selection and tuning choices automatically.</li>
+            </ul>
+        </div>
+        <div class="slide-footer">
+            <span>Machine Learning Foundations</span>
+            <span>Slide 12</span>
+        </div>
+    </div>
+
+</div>
+
+</body>
+</html>

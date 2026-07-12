@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="slides-format" content="viewport">
+  <title>Sensors for AI-Driven Cyber-Physical Systems</title>
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <style type="text/tailwindcss">
+    @theme {
+      --color-bg: #020617;
+      --color-bg-deep: #0f172a;
+      --color-surface: #1e293b;
+      --color-text: #e5e7eb;
+      --color-text-secondary: #cbd5e1;
+      --color-text-muted: #94a3b8;
+      --color-accent-1: #22c55e;
+      --color-accent-2: #4ade80;
+      --color-accent-3: #16a34a;
+      --color-glass-bg: rgba(255,255,255,0.06);
+      --color-glass-border: rgba(255,255,255,0.08);
+      --color-vignette: rgba(0,0,0,0.6);
+      --font-display: 'Instrument Serif', serif;
+      --font-body: 'Inter', sans-serif;
+    }
+  </style>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
+  <style>
+    :root { --color-bg: #020617; --color-text: #e5e7eb; --glow-color-rgb: 34,197,94; }
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body { background: var(--color-bg); margin: 0; }
+    body { font-family: var(--font-body); color: var(--color-text); overflow: hidden; height: 100vh; width: 100vw; }
+    .deck { width: 100vw; height: 100vh; position: relative; }
+    .slide { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: var(--color-bg); display: flex; flex-direction: column; align-items: center; justify-content: center; opacity: 0; transform: scale(0.95); transition: opacity 0.7s ease, transform 0.7s ease; pointer-events: none; overflow: hidden; }
+    .slide.active { opacity: 1; transform: scale(1); pointer-events: all; }
+    .slide > .content { position: relative; z-index: 2; width: 100%; max-width: 1100px; padding: clamp(1.5rem, 4vw, 4rem); }
+    .nav-controls { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); display: flex; align-items: center; gap: 16px; z-index: 100; background: var(--color-glass-bg); backdrop-filter: blur(10px); padding: 10px 24px; border-radius: 40px; border: 1px solid var(--color-glass-border); }
+    .nav-btn { width: 40px; height: 40px; border: none; background: var(--color-glass-bg); color: var(--color-accent-1); border-radius: 50%; font-size: 1.2rem; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.3s; }
+    .nav-btn:hover { background: var(--color-glass-border); }
+    .slide-dots { display: flex; gap: 8px; }
+    .slide-dots .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--color-glass-border); cursor: pointer; transition: background 0.3s, transform 0.3s; }
+    .slide-dots .dot.active { background: var(--color-accent-1); transform: scale(1.3); }
+    .slide-counter { font-size: 0.8rem; color: var(--color-text-muted); min-width: 40px; text-align: center; }
+    .reveal { opacity: 0; transform: translateY(20px); }
+    @keyframes float-slow {
+      0% { transform: translate(0, 0) scale(1); }
+      25% { transform: translate(60px, -50px) scale(1.12); }
+      50% { transform: translate(-40px, 40px) scale(0.9); }
+      75% { transform: translate(50px, 20px) scale(1.08); }
+      100% { transform: translate(0, 0) scale(1); }
+    }
+    @keyframes float-drift {
+      0% { transform: translate(0, 0) scale(1) rotate(0deg); }
+      33% { transform: translate(-50px, -60px) scale(1.15) rotate(3deg); }
+      66% { transform: translate(40px, 30px) scale(0.88) rotate(-2deg); }
+      100% { transform: translate(0, 0) scale(1) rotate(0deg); }
+    }
+    @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
+    .gradient-mesh { position: absolute; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
+    .blob { position: absolute; border-radius: 50%; filter: blur(80px); animation: float-slow 10s ease-in-out infinite; }
+    .blob:nth-child(2) { animation: float-drift 14s ease-in-out infinite; }
+    .blob:nth-child(3) { animation: float-slow 18s ease-in-out infinite reverse; }
+    .slide::before {
+      content: ''; position: absolute; inset: 0; z-index: 1; pointer-events: none;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+      background-repeat: repeat; background-size: 256px 256px; opacity: 0.03; mix-blend-mode: overlay;
+    }
+    .slide::after {
+      content: ''; position: absolute; inset: 0; z-index: 1; pointer-events: none;
+      background: radial-gradient(ellipse at center, transparent 50%, var(--color-vignette) 100%);
+    }
+    .mouse-spotlight { position:fixed; inset:0; z-index:99; pointer-events:none; }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.2s !important; }
+    }
+  </style>
+</head>
+<body>
+<div class="mouse-spotlight"></div>
+<div class="deck">
+  <!-- Slide 1: Title -->
+  <div class="slide slide-1 active" data-slide="1">
+    <div class="gradient-mesh">
+      <div class="blob" style="width:500px;height:500px;top:-120px;right:-120px;background:var(--color-accent-1);opacity:0.18;"></div>
+      <div class="blob" style="width:320px;height:320px;bottom:-90px;left:-80px;background:var(--color-accent-2);opacity:0.14;"></div>
+      <div class="blob" style="width:220px;height:220px;top:45%;left:10%;background:var(--color-accent-3);opacity:0.12;"></div>
+    </div>
+    <canvas class="particle-canvas" style="position:absolute;inset:0;z-index:1;"></canvas>
+    <div class="content text-center">
+      <div class="text-[120px] mb-5 animate-[float_3s_ease-in-out_infinite] drop-shadow-lg mx-auto">📡</div>
+      <h1 class="font-display text-[clamp(2.6rem,6vw,5rem)] font-black bg-linear-to-br from-accent-1 via-accent-2 to-accent-1 bg-clip-text text-transparent tracking-tight mb-4 reveal">Sensors for AI-Driven Cyber-Physical Systems</h1>
+      <p class="text-[clamp(0.9rem,1.5vw,1.4rem)] font-light text-text-muted tracking-[6px] uppercase reveal">Kolitha Warnakulasooriya &mdash; AI Driven Cyber Physical Systems (EE 490/506)</p>
+    </div>
+  </div>
+
+  <!-- Slide 2: What is Sensing -->
+  <div class="slide slide-2" data-slide="2">
+    <div class="gradient-mesh">
+      <div class="blob" style="width:360px;height:360px;top:-90px;right:-60px;background:var(--color-accent-1);opacity:0.10;"></div>
+      <div class="blob" style="width:260px;height:260px;bottom:-60px;left:-40px;background:var(--color-accent-2);opacity:0.08;"></div>
+    </div>
+    <div class="content">
+      <h2 class="font-display text-[clamp(2.1rem,4.5vw,3rem)] font-bold reveal">What is Sensing?</h2>
+      <p class="text-lg text-text-secondary mt-4 reveal">Sensing is the process of transforming a physical quantity into a computer-readable representation that can be used for estimation, control, and higher-level decision making.</p>
+      <div class="grid grid-cols-2 gap-8 mt-6">
+        <div class="bg-glass-bg backdrop-blur-xl border border-glass-border rounded-xl p-6 reveal">
+          <h3 class="font-display text-xl font-semibold mb-2">Exteroception</h3>
+          <p class="text-text-secondary">Perception of the external world: sensors that measure the state of the environment around the robot or CPS (e.g., range, vision, temperature).</p>
+        </div>
+        <div class="bg-glass-bg backdrop-blur-xl border border-glass-border rounded-xl p-6 reveal">
+          <h3 class="font-display text-xl font-semibold mb-2">Proprioception</h3>
+          <p class="text-text-secondary">Perception of the robot&apos;s own state: sensors that measure internal variables such as joint angles, velocity, forces, and battery state.</p>
+        </div>
+      </div>
+      <p class="text-text-muted mt-5 reveal">Together, exteroception and proprioception allow robots and CPS to build a consistent view of themselves and their surroundings.</p>
+    </div>
+  </div>
+
+  <!-- Slide 3: Why Sensors Matter -->
+  <div class="slide slide-3" data-slide="3">
+    <div class="gradient-mesh">
+      <div class="blob" style="width:340px;height:340px;top:-80px;right:-80px;background:var(--color-accent-2);opacity:0.10;"></div>
+      <div class="blob" style="width:260px;height:260px;bottom:-70px;left:-60px;background:var(--color-accent-3);opacity:0.08;"></div>
+    </div>
+    <div class="content">
+      <h2 class="font-display text-[clamp(2.1rem,4.5vw,3rem)] font-bold reveal">Sensors in Robotics and CPS</h2>
+      <ul class="list-disc list-inside text-text-secondary space-y-2 mt-4 reveal">
+        <li>Sensors provide internal feedback for closed-loop control and external interaction with the environment.</li>
+        <li>Animals and humans rely on distinct sensors; robotic systems emulate many of these sensing modalities.</li>
+        <li>A huge array of sensors is available to measure mechanical, electrical, chemical, and environmental phenomena.</li>
+        <li>In this course we focus on sensors used in robotics, automation, and cyber-physical systems rather than general instrumentation.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Slide 4: Perception Pipeline -->
+  <div class="slide slide-4" data-slide="4">
+    <div class="gradient-mesh">
+      <div class="blob" style="width:360px;height:360px;top:-90px;right:-40px;background:var(--color-accent-1);opacity:0.10;"></div>
+      <div class="blob" style="width:260px;height:260px;bottom:-70px;left:-60px;background:var(--color-accent-2);opacity:0.08;"></div>
+    </div>
+    <div class="content">
+      <h2 class="font-display text-[clamp(2.1rem,4.5vw,3rem)] font-bold reveal">Perception Process</h2>
+      <p class="text-text-secondary mt-3 reveal">From raw signals to understanding, perception in robots and CPS typically follows a four-stage pipeline.</p>
+      <div class="grid grid-cols-4 gap-4 mt-6 text-sm">
+        <div class="bg-glass-bg backdrop-blur-xl border border-glass-border rounded-xl p-4 reveal">
+          <h3 class="font-display text-base font-semibold mb-2">Signal Acquisition</h3>
+          <p class="text-text-secondary">Monitor internal or external state using appropriate sensors and sampling hardware.</p>
+        </div>
+        <div class="bg-glass-bg backdrop-blur-xl border border-glass-border rounded-xl p-4 reveal">
+          <h3 class="font-display text-base font-semibold mb-2">Pre-processing</h3>
+          <p class="text-text-secondary">Filtering noise, normalizing signals, and selecting regions of interest (ROI) for further analysis.</p>
+        </div>
+        <div class="bg-glass-bg backdrop-blur-xl border border-glass-border rounded-xl p-4 reveal">
+          <h3 class="font-display text-base font-semibold mb-2">Feature Extraction</h3>
+          <p class="text-text-secondary">Compute geometric and semantic features such as point clouds, edges, keypoints, or descriptors.</p>
+        </div>
+        <div class="bg-glass-bg backdrop-blur-xl border border-glass-border rounded-xl p-4 reveal">
+          <h3 class="font-display text-base font-semibold mb-2">Interpretation</h3>
+          <p class="text-text-secondary">Recognition, localization, and mapping that turn features into actionable understanding.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Slide 5: Sensor Taxonomy Overview -->
+  <div class="slide slide-5" data-slide="5">
+    <div class="gradient-mesh">
+      <div class="blob" style="width:340px;height:340px;top:-80px;right:-60px;background:var(--color-accent-2);opacity:0.10;"></div>
+      <div class="blob" style="width:260px;height:260px;bottom:-70px;left:-50px;background:var(--color-accent-3);opacity:0.08;"></div>
+    </div>
+    <div class="content">
+      <h2 class="font-display text-[clamp(2.1rem,4.5vw,3rem)] font-bold reveal">Types of Sensors</h2>
+      <p class="text-text-secondary mt-3 reveal">Robotic and CPS applications use a broad taxonomy of sensors grouped by the physical quantity they measure.</p>
+      <div class="grid grid-cols-2 gap-6 mt-5">
+        <div class="reveal">
+          <ul class="list-disc list-inside text-text-secondary space-y-2">
+            <li><span class="font-semibold">Position:</span> encoders, LVDT, GPS, Hall-effect sensors.</li>
+            <li><span class="font-semibold">Velocity:</span> accelerometers, gyroscopes, Doppler velocimeters, tachometers, encoders.</li>
+            <li><span class="font-semibold">Force/Torque:</span> torque sensors, strain gauges, piezoelectric sensors, load cells.</li>
+            <li><span class="font-semibold">Tactile:</span> tactile array sensors, piezoresistive rubber or skins.</li>
+            <li><span class="font-semibold">Touch:</span> limit switches, capacitive and resistive touch sensors.</li>
+            <li><span class="font-semibold">Proximity:</span> inductive, capacitive, photoelectric sensors.</li>
+          </ul>
+        </div>
+        <div class="reveal">
+          <ul class="list-disc list-inside text-text-secondary space-y-2">
+            <li><span class="font-semibold">Range finders:</span> LiDAR, ultrasonic sensors, radar.</li>
+            <li><span class="font-semibold">Vision:</span> CCD/CMOS cameras, IR cameras, RGB-D depth cameras.</li>
+            <li><span class="font-semibold">Sniff:</span> gas sensors, electronic noses (E-nose).</li>
+            <li><span class="font-semibold">Taste:</span> pH sensors, ion-selective electrodes.</li>
+            <li><span class="font-semibold">Speech synthesis:</span> neural text-to-speech (TTS) systems.</li>
+            <li><span class="font-semibold">Speech recognition:</span> microphone arrays for voice input and beamforming.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Slide 6: Sensor Characteristics -->
+  <div class="slide slide-6" data-slide="6">
+    <div class="gradient-mesh">
+      <div class="blob" style="width:360px;height:360px;top:-90px;right:-40px;background:var(--color-accent-1);opacity:0.10;"></div>
+      <div class="blob" style="width:260px;height:260px;bottom:-70px;left:-60px;background:var(--color-accent-2);opacity:0.08;"></div>
+    </div>
+    <div class="content">
+      <h2 class="font-display text-[clamp(2.1rem,4.5vw,3rem)] font-bold reveal">Key Sensor Characteristics</h2>
+      <p class="text-text-secondary mt-3 reveal">When selecting sensors for CPS, we must consider both physical and signal-level characteristics.</p>
+      <div class="grid grid-cols-2 gap-6 mt-5">
+        <div class="reveal">
+          <ul class="list-disc list-inside text-text-secondary space-y-2">
+            <li>Cost, size, and weight constraints for the platform.</li>
+            <li>Type of output (digital vs analog) and required interfacing (ADC/DAC, communication bus).</li>
+            <li>Resolution: smallest detectable change in the measured quantity.</li>
+            <li>Sensitivity: ratio of output change to input change; determines signal-to-noise behavior.</li>
+            <li>Linearity: how closely output follows a straight-line relationship with input.</li>
+            <li>Range: smallest and largest measurable outputs without saturation.</li>
+          </ul>
+        </div>
+        <div class="reveal">
+          <ul class="list-disc list-inside text-text-secondary space-y-2">
+            <li>Response time: time required to reach a certain percentage of the final value.</li>
+            <li>Time constant: special response time corresponding to 63.2% of the total change.</li>
+            <li>Rise time: time from 10% to 90% of the final value.</li>
+            <li>Settling time: time from initial state to within 2% of the final value.</li>
+            <li>Frequency response: bandwidth over which the sensor accurately tracks variations.</li>
+            <li>Reliability, accuracy, and repeatability under operating conditions.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Slide 7: Position Sensors - Overview -->
+  <div class="slide slide-7" data-slide="7">
+    <div class="gradient-mesh">
+      <div class="blob" style="width:340px;height:340px;top:-80px;right:-80px;background:var(--color-accent-2);opacity:0.10;"></div>
+      <div class="blob" style="width:260px;height:260px;bottom:-70px;left:-60px;background:var(--color-accent-3);opacity:0.08;"></div>
+    </div>
+    <div class="content">
+      <h2 class="font-display text-[clamp(2.1rem,4.5vw,3rem)] font-bold reveal">Position Sensors</h2>
+      <p class="text-text-secondary mt-3 reveal">Position sensors measure linear or angular displacement of mechanical components such as joints, shafts, and end-effectors.</p>
+      <ul class="list-disc list-inside text-text-secondary space-y-2 mt-4 reveal">
+        <li>Potentiometers: analog rotary or linear resistors used for internal feedback of joint angles.</li>
+        <li>Encoders: digital rotary or linear devices that count discrete steps of motion.</li>
+        <li>LVDT and resolvers: transformer-based sensors providing continuous analog position signals.</li>
+        <li>Hall-effect sensors: magnetic field sensors used for rotor position in brushless motors.</li>
+        <li>GPS: absolute global position for outdoor CPS platforms.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Slide 8: Potentiometers -->
+  <div class="slide slide-8" data-slide="8">
+    <div class="gradient-mesh">
+      <div class="blob" style="width:360px;height:360px;top:-90px;right:-40px;background:var(--color-accent-1);opacity:0.10;"></div>
+      <div class="blob" style="width:260px;height:260px;bottom:-70px;left:-60px;background:var(--color-accent-2);opacity:0.08;"></div>
+    </div>
+    <div class="content">
+      <h2 class="font-display text-[clamp(2.1rem,4.5vw,3rem)] font-bold reveal">Potentiometers</h2>
+      <p class="text-text-secondary mt-3 reveal">Potentiometers are simple, inexpensive position sensors widely used for internal feedback in control systems.</p>
+      <div class="grid grid-cols-2 gap-6 mt-5">
+        <div class="reveal">
+          <ul class="list-disc list-inside text-text-secondary space-y-2">
+            <li>Provide an analog voltage proportional to shaft or slider position.</li>
+            <li>Available in rotary or linear form, with single or multi-turn variants.</li>
+            <li>Wire-wound potentiometers produce stepwise outputs, while conductive polymer paste gives continuous output.</li>
+          </ul>
+        </div>
+        <div class="reveal flex items-center justify-center">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/4/45/Potentiometer.jpg" alt="Rotary potentiometer" class="max-h-48 rounded-xl border border-glass-border" />
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Slide 9: Encoders -->
+  <div class="slide slide-9" data-slide="9">
+    <div class="gradient-mesh">
+      <div class="blob" style="width:340px;height:340px;top:-80px;right:-60px;background:var(--color-accent-2);opacity:0.10;"></div>
+      <div class="blob" style="width:260px;height:260px;bottom:-70px;left:-60px;background:var(--color-accent-3);opacity:0.08;"></div>
+    </div>
+    <div class="content">
+      <h2 class="font-display text-[clamp(2.1rem,4.5vw,3rem)] font-bold reveal">Encoders</h2>
+      <p class="text-text-secondary mt-3 reveal">Encoders convert mechanical motion into digital pulses that can be counted to estimate position, speed, and direction.</p>
+      <div class="grid grid-cols-2 gap-6 mt-5">
+        <div class="reveal">
+          <ul class="list-disc list-inside text-text-secondary space-y-2">
+            <li>A disk or strip is divided into sections that alternate between opaque/transparent or reflective/non-reflective regions.</li>
+            <li>An LED or other light source on one side and a phototransistor on the other detect transitions as the disk moves.</li>
+            <li>Can be linear or rotary, with resolutions ranging from tens to many thousands of counts per revolution.</li>
+          </ul>
+        </div>
+        <div class="reveal flex items-center justify-center">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/8/8c/Incremental_encoder.jpg" alt="Incremental rotary encoder" class="max-h-48 rounded-xl border border-glass-border" />
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Slide 10: Absolute vs Incremental Encoders -->
+  <div class="slide slide-10" data-slide="10">
+    <div class="gradient-mesh">
+      <div class="blob" style="width:360px;height:360px;top:-90px;right:-40px;background:var(--color-accent-1);opacity:0.10;"></div>
+      <div class="blob" style="width:260px;height:260px;bottom:-70px;left:-60px;background:var(--color-accent-2);opacity:0.08;"></div>
+    </div>
+    <div class="content">
+      <h2 class="font-display text-[clamp(2.1rem,4.5vw,3rem)] font-bold reveal">Absolute vs Incremental Encoders</h2>
+      <div class="grid grid-cols-2 gap-6 mt-5">
+        <div class="bg-glass-bg backdrop-blur-xl border border-glass-border rounded-xl p-6 reveal">
+          <h3 class="font-display text-xl font-semibold mb-2">Absolute Encoders</h3>
+          <ul class="list-disc list-inside text-text-secondary space-y-2">
+            <li>Each position corresponds to a unique pattern of clear and opaque sectors.</li>
+            <li>Provide absolute position without needing a reference homing step.</li>
+            <li>Higher resolutions require more output lines; often use binary or Gray code, where only one bit changes at a time.</li>
+          </ul>
+        </div>
+        <div class="bg-glass-bg backdrop-blur-xl border border-glass-border rounded-xl p-6 reveal">
+          <h3 class="font-display text-xl font-semibold mb-2">Incremental Encoders</h3>
+          <ul class="list-disc list-inside text-text-secondary space-y-2">
+            <li>Use repeating equal sections that represent identical angle steps.</li>
+            <li>Measure changes in position and speed but not absolute angle without homing.</li>
+            <li>Direction requires two channels in quadrature (half-step out of phase) to infer rotation direction.</li>
+            <li>Simple to use, with few output lines and potentially very high resolution.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Slide 11: LVDTs and Resolvers -->
+  <div class="slide slide-11" data-slide="11">
+    <div class="gradient-mesh">
+      <div class="blob" style="width:340px;height:340px;top:-80px;right:-60px;background:var(--color-accent-2);opacity:0.10;"></div>
+      <div class="blob" style="width:260px;height:260px;bottom:-70px;left:-60px;background:var(--color-accent-3);opacity:0.08;"></div>
+    </div>
+    <div class="content">
+      <h2 class="font-display text-[clamp(2.1rem,4.5vw,3rem)] font-bold reveal">LVDTs and Resolvers</h2>
+      <div class="grid grid-cols-2 gap-6 mt-5">
+        <div class="reveal">
+          <h3 class="font-display text-xl font-semibold mb-2">Linear Variable Differential Transformer (LVDT)</h3>
+          <ul class="list-disc list-inside text-text-secondary space-y-2">
+            <li>A transformer whose movable core tracks linear displacement.</li>
+            <li>Produces a variable analog voltage proportional to position.</li>
+            <li>Known for reliability, simple design, and highly linear output over its operating range.</li>
+          </ul>
+        </div>
+        <div class="reveal">
+          <h3 class="font-display text-xl font-semibold mb-2">Resolvers</h3>
+          <ul class="list-disc list-inside text-text-secondary space-y-2">
+            <li>Angular analog counterparts to LVDTs, used for measuring rotation.</li>
+            <li>Primary coil rotates with the shaft and carries AC excitation; two secondary coils are placed 90 degrees apart.</li>
+            <li>Induced voltages vary sinusoidally with angle, yielding sine/cosine outputs that can be digitized for precise angular position.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Slide 12: Hall-Effect Sensors -->
+  <div class="slide slide-12" data-slide="12">
+    <div class="gradient-mesh">
+      <div class="blob" style="width:360px;height:360px;top:-90px;right:-40px;background:var(--color-accent-1);opacity:0.10;"></div>
+      <div class="blob" style="width:260px;height:260px;bottom:-70px;left:-60px;background:var(--color-accent-2);opacity:0.08;"></div>
+    </div>
+    <div class="content">
+      <h2 class="font-display text-[clamp(2.1rem,4.5vw,3rem)] font-bold reveal">Hall-Effect Position Sensors</h2>
+      <p class="text-text-secondary mt-3 reveal">Hall-effect sensors measure magnetic fields and are widely used for contactless position sensing in motors and CPS.</p>
+      <div class="grid grid-cols-2 gap-6 mt-5">
+        <div class="reveal">
+          <ul class="list-disc list-inside text-text-secondary space-y-2">
+            <li>The output voltage of a current-carrying conductor changes in the presence of a perpendicular magnetic field.</li>
+            <li>Hall transducers generate analog voltage signals that can be digitized for control applications.</li>
+            <li>Used extensively to sense rotor position in brushless DC motors and for proximity detection of magnets.</li>
+          </ul>
+        </div>
+        <div class="reveal flex items-center justify-center">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/9/9c/Hall_sensor.svg" alt="Hall effect sensor diagram" class="max-h-48 rounded-xl border border-glass-border bg-bg" />
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Slide 13: Velocity Sensors - Accelerometers & Gyros -->
+  <div class="slide slide-13" data-slide="13">
+    <div class="gradient-mesh">
+      <div class="blob" style="width:340px;height:340px;top:-80px;right:-60px;background:var(--color-accent-2);opacity:0.10;"></div>
+      <div class="blob" style="width:260px;height:260px;bottom:-70px;left:-60px;background:var(--color-accent-3);opacity:0.08;"></div>
+    </div>
+    <div class="content">
+      <h2 class="font-display text-[clamp(2.1rem,4.5vw,3rem)] font-bold reveal">Velocity and Motion Sensors</h2>
+      <p class="text-text-secondary mt-3 reveal">Motion sensors capture linear and angular dynamics, enabling inertial navigation, stabilization, and vibration monitoring.</p>
+      <div class="grid grid-cols-2 gap-6 mt-5">
+        <div class="reveal">
+          <h3 class="font-display text-xl font-semibold mb-2">Accelerometers</h3>
+          <ul class="list-disc list-inside text-text-secondary space-y-2">
+            <li>Measure external forces, including gravity, along one to three axes.</li>
+            <li>Mechanical accelerometers use a mass-spring system; modern MEMS devices use silicon microstructures.</li>
+            <li>Provide low-power, multi-axis acceleration and vibration data for CPS.</li>
+          </ul>
+        </div>
+        <div class="reveal">
+          <h3 class="font-display text-xl font-semibold mb-2">Gyroscopes</h3>
+          <ul class="list-disc list-inside text-text-secondary space-y-2">
+            <li>Measure angular velocity around one or more axes to track orientation.</li>
+            <li>MEMS gyros rely on Coriolis forces acting on a vibrating mass, producing capacitance or piezoelectric changes.</li>
+            <li>Provide 1–3 axis rotational rate outputs used in IMUs and attitude estimation.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Slide 14: Tachometers & Doppler -->
+  <div class="slide slide-14" data-slide="14">
+    <div class="gradient-mesh">
+      <div class="blob" style="width:360px;height:360px;top:-90px;right:-40px;background:var(--color-accent-1);opacity:0.10;"></div>
+      <div class="blob" style="width:260px;height:260px;bottom:-70px;left:-60px;background:var(--color-accent-2);opacity:0.08;"></div>
+    </div>
+    <div class="content">
+      <h2 class="font-display text-[clamp(2.1rem,4.5vw,3rem)] font-bold reveal">Tachometers and Doppler Velocimeters</h2>
+      <div class="grid grid-cols-2 gap-6 mt-5">
+        <div class="reveal">
+          <h3 class="font-display text-xl font-semibold mb-2">Tachometers</h3>
+          <ul class="list-disc list-inside text-text-secondary space-y-2">
+            <li>Measure rotational speed in revolutions per minute (RPM).</li>
+            <li>Count rotations or pulses from a rotating element via magnetic pickup, optical beam, or generator action.</li>
+            <li>Can be mechanical generator-type, electronic, or non-contact optical/laser devices.</li>
+          </ul>
+        </div>
+        <div class="reveal">
+          <h3 class="font-display text-xl font-semibold mb-2">Doppler Velocimeters</h3>
+          <ul class="list-disc list-inside text-text-secondary space-y-2">
+            <li>Non-contact sensors measuring line-of-sight velocity using laser, radar, or acoustic waves.</li>
+            <li>Relative motion between sensor and target shifts the frequency of the reflected signal (Doppler effect).</li>
+            <li>Electronics demodulate the frequency shift to output real-time velocity measurements.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Slide 15: Force and Torque Sensors -->
+  <div class="slide slide-15" data-slide="15">
+    <div class="gradient-mesh">
+      <div class="blob" style="width:340px;height:340px;top:-80px;right:-60px;background:var(--color-accent-2);opacity:0.10;"></div>
+      <div class="blob" style="width:260px;height:260px;bottom:-70px;left:-60px;background:var(--color-accent-3);opacity:0.08;"></div>
+    </div>
+    <div class="content">
+      <h2 class="font-display text-[clamp(2.1rem,4.5vw,3rem)] font-bold reveal">Force and Torque Sensing</h2>
+      <p class="text-text-secondary mt-3 reveal">Force and torque sensors allow robots and CPS to measure interaction forces for compliance, manipulation, and structural monitoring.</p>
+      <div class="grid grid-cols-2 gap-6 mt-5">
+        <div class="reveal">
+          <h3 class="font-display text-xl font-semibold mb-2">Piezoelectric Sensors</h3>
+          <ul class="list-disc list-inside text-text-secondary space-y-2">
+            <li>Piezoelectric materials generate electric charge when mechanically stressed and deform when an electric field is applied.</li>
+            <li>Mechanical pressure induces charge that appears as a measurable voltage across electrodes.</li>
+            <li>Used in vibration, impact, and dynamic force sensing with analog outputs.</li>
+          </ul>
+        </div>
+        <div class="reveal">
+          <h3 class="font-display text-xl font-semibold mb-2">Strain Gauges and Torque Sensors</h3>
+          <ul class="list-disc list-inside text-text-secondary space-y-2">
+            <li>Strain gauges convert tiny changes in length or deformation into resistance changes; often wired in Wheatstone bridges.</li>
+            <li>Torque sensors use pairs of force sensors placed strategically to measure torque around specific axes.</li>
+            <li>Multiple sensor pairs in different planes can resolve full 6-axis force/torque vectors.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Slide 16: Tactile and Touch Sensors -->
+  <div class="slide slide-16" data-slide="16">
+    <div class="gradient-mesh">
+      <div class="blob" style="width:360px;height:360px;top:-90px;right:-40px;background:var(--color-accent-1);opacity:0.10;"></div>
+      <div class="blob" style="width:260px;height:260px;bottom:-70px;left:-60px;background:var(--color-accent-2);opacity:0.08;"></div>
+    </div>
+    <div class="content">
+      <h2 class="font-display text-[clamp(2.1rem,4.5vw,3rem)] font-bold reveal">Tactile and Touch Sensors</h2>
+      <div class="grid grid-cols-2 gap-6 mt-5">
+        <div class="reveal">
+          <h3 class="font-display text-xl font-semibold mb-2">Tactile Array Sensors</h3>
+          <ul class="list-disc list-inside text-text-secondary space-y-2">
+            <li>Arrays of touch elements that report spatial patterns of contact.</li>
+            <li>Provide information about shape, size, and material properties of grasped objects.</li>
+            <li>Implementations include piezoresistive rubber skins and other pressure-sensitive matrices.</li>
+          </ul>
+        </div>
+        <div class="reveal">
+          <h3 class="font-display text-xl font-semibold mb-2">Touch and Limit Switches</h3>
+          <ul class="list-disc list-inside text-text-secondary space-y-2">
+            <li>Limit/micro switches change electrical contacts when a moving part reaches a preset mechanical position.</li>
+            <li>Touch sensors respond to direct physical contact, pressure, or proximity.</li>
+            <li>Resistive touch sensors respond to pressure between conductive layers; capacitive touch sensors detect changes in an electric field caused by a finger or conductive object.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Slide 17: Proximity and Ultrasonic -->
+  <div class="slide slide-17" data-slide="17">
+    <div class="gradient-mesh">
+      <div class="blob" style="width:340px;height:340px;top:-80px;right:-60px;background:var(--color-accent-2);opacity:0.10;"></div>
+      <div class="blob" style="width:260px;height:260px;bottom:-70px;left:-60px;background:var(--color-accent-3);opacity:0.08;"></div>
+    </div>
+    <div class="content">
+      <h2 class="font-display text-[clamp(2.1rem,4.5vw,3rem)] font-bold reveal">Proximity and Ultrasonic Sensors</h2>
+      <div class="grid grid-cols-2 gap-6 mt-5">
+        <div class="reveal">
+          <h3 class="font-display text-xl font-semibold mb-2">Proximity Sensors</h3>
+          <ul class="list-disc list-inside text-text-secondary space-y-2">
+            <li>Detect nearby objects before physical contact occurs.</li>
+            <li>Magnetic sensors trigger near magnets; optical sensors only see signals when within a specified range.</li>
+            <li>Inductive sensors detect metal, while capacitive sensors respond to objects with dielectric constants above about 1.2.</li>
+          </ul>
+        </div>
+        <div class="reveal">
+          <h3 class="font-display text-xl font-semibold mb-2">Ultrasonic Range Finders</h3>
+          <ul class="list-disc list-inside text-text-secondary space-y-2">
+            <li>Emit bursts of high-frequency sound (typically around 40 kHz) and measure echo time-of-flight to estimate distance.</li>
+            <li>Can operate in opposed-mode (transmitter/receiver facing) or echo-mode (single module measuring reflections).</li>
+            <li>Accuracy depends on sound speed, which varies with temperature and medium density, and is affected by surface reflectivity and background noise.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Slide 18: LiDAR and Range Sensing -->
+  <div class="slide slide-18" data-slide="18">
+    <div class="gradient-mesh">
+      <div class="blob" style="width:360px;height:360px;top:-90px;right:-40px;background:var(--color-accent-1);opacity:0.10;"></div>
+      <div class="blob" style="width:260px;height:260px;bottom:-70px;left:-60px;background:var(--color-accent-2);opacity:0.08;"></div>
+    </div>
+    <div class="content">
+      <h2 class="font-display text-[clamp(2.1rem,4.5vw,3rem)] font-bold reveal">LiDAR Range Sensing</h2>
+      <p class="text-text-secondary mt-3 reveal">LiDAR (Light Detection and Ranging) is an active remote sensing technology that creates precise 3D maps and point clouds.</p>
+      <div class="grid grid-cols-2 gap-6 mt-5">
+        <div class="reveal">
+          <ul class="list-disc list-inside text-text-secondary space-y-2">
+            <li>Emits rapid laser pulses and measures their return time to compute distance based on the speed of light.</li>
+            <li>Generates dense 3D point clouds for environment mapping, obstacle detection, and SLAM.</li>
+            <li>Common types include airborne LiDAR (ALS), terrestrial LiDAR (TLS), and bathymetric LiDAR for water surfaces.</li>
+          </ul>
+        </div>
+        <div class="reveal flex items-center justify-center">
+          <img src="https://miro.medium.com/v2/resize:fit:800/0*nbIvixInmSJnlpA1.jpg" alt="LiDAR point cloud" class="max-h-48 rounded-xl border border-glass-border" />
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Slide 19: Image and Thermal Sensors -->
+  <div class="slide slide-19" data-slide="19">
+    <div class="gradient-mesh">
+      <div class="blob" style="width:340px;height:340px;top:-80px;right:-60px;background:var(--color-accent-2);opacity:0.10;"></div>
+      <div class="blob" style="width:260px;height:260px;bottom:-70px;left:-60px;background:var(--color-accent-3);opacity:0.08;"></div>
+    </div>
+    <div class="content">
+      <h2 class="font-display text-[clamp(2.1rem,4.5vw,3rem)] font-bold reveal">Image, Thermal, and Hyperspectral Sensors</h2>
+      <div class="grid grid-cols-2 gap-6 mt-5">
+        <div class="reveal">
+          <h3 class="font-display text-xl font-semibold mb-2">Image Sensors</h3>
+          <ul class="list-disc list-inside text-text-secondary space-y-2">
+            <li>Convert incident light into electrical signals to form digital images.</li>
+            <li>CMOS sensors are low-power and integrate processing; CCD sensors offer low noise and uniform response.</li>
+            <li>SPAD sensors detect single photons for ultra-low-light and time-of-flight applications.</li>
+          </ul>
+        </div>
+        <div class="reveal">
+          <h3 class="font-display text-xl font-semibold mb-2">Thermal and Hyperspectral Cameras</h3>
+          <ul class="list-disc list-inside text-text-secondary space-y-2">
+            <li>Thermal cameras detect infrared radiation using microbolometer arrays, producing heat maps.</li>
+            <li>Hyperspectral cameras capture hundreds of narrow spectral bands to characterize materials and conditions.</li>
+            <li>Applications include early crop disease detection, counterfeit drug identification, and advanced depth/3D sensing.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Slide 20: IMUs and Sensor Fusion -->
+  <div class="slide slide-20" data-slide="20">
+    <div class="gradient-mesh">
+      <div class="blob" style="width:360px;height:360px;top:-90px;right:-40px;background:var(--color-accent-1);opacity:0.10;"></div>
+      <div class="blob" style="width:260px;height:260px;bottom:-70px;left:-60px;background:var(--color-accent-2);opacity:0.08;"></div>
+    </div>
+    <div class="content">
+      <h2 class="font-display text-[clamp(2.1rem,4.5vw,3rem)] font-bold reveal">IMUs and Sensor Fusion</h2>
+      <p class="text-text-secondary mt-3 reveal">Inertial Measurement Units (IMUs) combine multiple motion sensors to provide robust estimates of orientation and motion.</p>
+      <ul class="list-disc list-inside text-text-secondary space-y-2 mt-4 reveal">
+        <li>Accelerometer: measures linear acceleration, including gravity, to infer tilt or translational motion.</li>
+        <li>Gyroscope: measures angular velocity (rotation rate) around axes.</li>
+        <li>Magnetometer: detects magnetic fields to provide heading relative to Earth&apos;s magnetic north.</li>
+        <li>Sensor fusion algorithms such as Kalman filtering combine these signals to reduce noise and drift and produce stable pose estimates.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Slide 21: Audio Sensors -->
+  <div class="slide slide-21" data-slide="21">
+    <div class="gradient-mesh">
+      <div class="blob" style="width:340px;height:340px;top:-80px;right:-60px;background:var(--color-accent-2);opacity:0.10;"></div>
+      <div class="blob" style="width:260px;height:260px;bottom:-70px;left:-60px;background:var(--color-accent-3);opacity:0.08;"></div>
+    </div>
+    <div class="content">
+      <h2 class="font-display text-[clamp(2.1rem,4.5vw,3rem)] font-bold reveal">Microphones and Audio Sensing</h2>
+      <p class="text-text-secondary mt-3 reveal">Microphones convert acoustic energy (sound waves) into electrical energy for analysis and interaction.</p>
+      <ul class="list-disc list-inside text-text-secondary space-y-2 mt-4 reveal">
+        <li>Used for acoustic source localization, voice interfaces, and environmental sound monitoring.</li>
+        <li>Beamforming with microphone arrays enables directional hearing and noise suppression by weighting signals across the array.</li>
+        <li>Audio sensing is critical for human-robot interaction, speech recognition, and surveillance applications.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Slide 22: Summary -->
+  <div class="slide slide-22" data-slide="22">
+    <div class="gradient-mesh">
+      <div class="blob" style="width:360px;height:360px;top:-90px;right:-40px;background:var(--color-accent-1);opacity:0.12;"></div>
+      <div class="blob" style="width:260px;height:260px;bottom:-70px;left:-60px;background:var(--color-accent-2);opacity:0.10;"></div>
+    </div>
+    <canvas class="particle-canvas" style="position:absolute;inset:0;z-index:1;"></canvas>
+    <div class="content text-center">
+      <h2 class="font-display text-[clamp(2.3rem,5vw,3.5rem)] font-bold bg-linear-to-br from-accent-1 via-accent-2 to-accent-1 bg-clip-text text-transparent tracking-tight mb-4 reveal">From Physical World to AI Decisions</h2>
+      <p class="text-text-secondary text-lg mt-3 reveal">Sensors transform physical phenomena into data streams that feed estimation, control, and learning algorithms in modern cyber-physical systems.</p>
+      <p class="text-text-muted mt-3 reveal">Understanding sensor principles, characteristics, and limitations is essential for designing robust, safe, and intelligent CPS.</p>
+    </div>
+  </div>
+</div>
+
+<div class="nav-controls">
+  <button class="nav-btn" onclick="changeSlide(-1)">&#8249;</button>
+  <div class="slide-dots" id="dots"></div>
+  <button class="nav-btn" onclick="changeSlide(1)">&#8250;</button>
+  <span class="slide-counter" id="counter">1 / 22</span>
+</div>
+
+<script>
+let current = 1;
+const total = document.querySelectorAll('.slide').length;
+const dotsContainer = document.getElementById('dots');
+const counter = document.getElementById('counter');
+for (let i = 1; i <= total; i++) { const dot = document.createElement('div'); dot.className = 'dot' + (i === 1 ? ' active' : ''); dot.onclick = () => goToSlide(i); dotsContainer.appendChild(dot); }
+function goToSlide(n) {
+  const prev = document.querySelector('.slide.active');
+  const next = document.querySelector(`.slide[data-slide="${n}"]`);
+  if (prev) prev.classList.remove('active');
+  if (next) { next.classList.add('active'); animateSlide(next); }
+  current = n; updateNav();
+}
+function changeSlide(dir) { let next = current + dir; if (next < 1) next = total; if (next > total) next = 1; goToSlide(next); }
+function updateNav() { document.querySelectorAll('.dot').forEach((d, i) => { d.classList.toggle('active', i + 1 === current); }); counter.textContent = current + ' / ' + total; }
+document.addEventListener('keydown', (e) => { if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); changeSlide(1); } if (e.key === 'ArrowLeft') { e.preventDefault(); changeSlide(-1); } });
+let touchStartX = 0;
+document.addEventListener('touchstart', (e) => { touchStartX = e.touches[0].clientX; });
+document.addEventListener('touchend', (e) => { const diff = touchStartX - e.changedTouches[0].clientX; if (Math.abs(diff) > 50) changeSlide(diff > 0 ? 1 : -1); });
+function animateSlide(slide) {
+  slide.querySelectorAll('.reveal').forEach((el, i) => {
+    el.style.transition = 'none';
+    el.style.opacity = '0';
+    el.style.transform = 'translateY(20px)';
+    el.offsetHeight;
+    const delay = i * 0.08;
+    el.style.transition = `opacity 0.35s ease ${delay}s, transform 0.35s ease ${delay}s`;
+    el.style.opacity = '1';
+    el.style.transform = 'translateY(0px)';
+  });
+}
+
+document.addEventListener('mousemove', (e) => {
+  const spotlight = document.querySelector('.mouse-spotlight');
+  if (spotlight) {
+    const rgb = getComputedStyle(document.documentElement).getPropertyValue('--glow-color-rgb').trim() || '34,197,94';
+    spotlight.style.background = `radial-gradient(600px circle at ${e.clientX}px ${e.clientY}px, rgba(${rgb}, 0.06), transparent 40%)`;
+  }
+});
+
+function initParticles(canvas) {
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  canvas.width = canvas.offsetWidth; canvas.height = canvas.offsetHeight;
+  const count = 55;
+  let mx = -1000, my = -1000;
+  const rgb = getComputedStyle(document.documentElement).getPropertyValue('--glow-color-rgb').trim() || '34,197,94';
+  const [r, g, b] = rgb.split(',').map(Number);
+  const particles = Array.from({ length: count }, () => ({
+    x: Math.random() * canvas.width,
+    y: Math.random() * canvas.height,
+    vx: (Math.random() - 0.5) * 0.3,
+    vy: (Math.random() - 0.5) * 0.3,
+    size: Math.random() * 2.5 + 0.8,
+    alpha: Math.random() * 0.35 + 0.1
+  }));
+  canvas.addEventListener('mousemove', (e) => { const rect = canvas.getBoundingClientRect(); mx = e.clientX - rect.left; my = e.clientY - rect.top; });
+  canvas.addEventListener('mouseleave', () => { mx = -1000; my = -1000; });
+  (function animate() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    particles.forEach(p => {
+      const dx = p.x - mx, dy = p.y - my;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      if (dist < 120) {
+        const force = (120 - dist) / 120 * 2;
+        p.vx += (dx / dist) * force * 0.1;
+        p.vy += (dy / dist) * force * 0.1;
+      }
+      p.vx *= 0.98; p.vy *= 0.98; p.x += p.vx; p.y += p.vy;
+      if (p.x < 0) p.x = canvas.width; if (p.x > canvas.width) p.x = 0;
+      if (p.y < 0) p.y = canvas.height; if (p.y > canvas.height) p.y = 0;
+      ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(${r},${b},${g},${p.alpha})`;
+      ctx.fill();
+    });
+    requestAnimationFrame(animate);
+  })();
+}
+
+document.querySelectorAll('.particle-canvas').forEach(c => initParticles(c));
+
+animateSlide(document.querySelector('.slide.active'));
+</script>
+</body>
+</html>
