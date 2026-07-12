@@ -38,11 +38,12 @@ conda env export --no-builds --format=environment-yaml | grep -v "^prefix: " > e
 
 ```
 cd sensorhub && python -m uvicorn app:app --reload
+
 ```
 
 ### Presentations
 
-- [1. Overview of AI-Driven CPS](https://html-preview.github.io/?url=https://github.com/kolithawarnakulasooriya/AI-driven-cyber-physical-system/blob/SpoofingAttack/presentations/cps-ai-intro.html)
-- [2. Sensors](https://html-preview.github.io/?url=https://github.com/kolithawarnakulasooriya/AI-driven-cyber-physical-system/blob/SpoofingAttack/presentations/sensors-cps.html)
-- [3. Kemlan Filtering](https://html-preview.github.io/?url=https://github.com/kolithawarnakulasooriya/AI-driven-cyber-physical-system/blob/SpoofingAttack/presentations/kelman-filter-cps.html)
-- [4. Kemlan Filtering](https://html-preview.github.io/?url=https://github.com/kolithawarnakulasooriya/AI-driven-cyber-physical-system/blob/SpoofingAttack/presentations/machine-learning-cps.html)
+- [1. Overview of AI-Driven CPS](https://html-preview.github.io/?url=https://github.com/kolithawarnakulasooriya/AI-driven-cyber-physical-system/blob/main/presentations/cps-ai-intro.html)
+- [2. Sensors](https://html-preview.github.io/?url=https://github.com/kolithawarnakulasooriya/AI-driven-cyber-physical-system/blob/main/presentations/sensors-cps.html)
+- [3. Kemlan Filtering](https://html-preview.github.io/?url=https://github.com/kolithawarnakulasooriya/AI-driven-cyber-physical-system/blob/main/presentations/kelman-filter-cps.html)
+- [4. Machine Learning](https://htmlpreview.github.io/?https://github.com/kolithawarnakulasooriya/AI-driven-cyber-physical-system/blob/main/presentations/machine-learning-cps.html)
