@@ -1,0 +1,20 @@
+[wokwi]
+version = 1
+elf = "RPI_PICO-20251209-v1.27.0.uf2"
+firmware = "RPI_PICO-20251209-v1.27.0.uf2"
+rfc2217ServerPort = 4000
+
+[[files]]
+path = "main.py"
+[files.options]
+target = "main.py"
+
+[[files]]
+path = "imu.py"
+[files.options]
+target = "imu.py"
+
+[[files]]
+path = "vector3d.py"
+[files.options]
+target = "vector3d.py"
