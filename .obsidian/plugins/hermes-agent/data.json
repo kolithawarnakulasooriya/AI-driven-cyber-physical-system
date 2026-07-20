@@ -1,0 +1,17 @@
+{
+  "baseUrl": "http://127.0.0.1:8642",
+  "apiKey": "api-server-9406a9cd7b486bb79329477e77IhQz6nAjDuVU",
+  "model": "",
+  "transport": "auto",
+  "reasoningEffort": "",
+  "includeNoteContent": true,
+  "requestTimeoutMs": 120000,
+  "maxTabs": 3,
+  "workingFolder": "",
+  "autoApproveTools": true,
+  "userName": "",
+  "hermesHome": "",
+  "graphMaxNotes": 150,
+  "graphMinEdgeWeight": 0.3,
+  "graphIncludeWikilinks": true
+}
