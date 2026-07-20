@@ -1,63 +1,110 @@
+---
+created: 2026-07-20
+author: Kolitha W.
+tags: [sensorhub, study-guide, obsidian]
+---
+
 # SensorHub Study Guide
 
+> *A quick-reference guide for getting up to speed with the SensorHub ecosystem, formatted for Obsidian integration.*
+
+## Table of Contents
+1. [Overview](#overview)  
+2. [Core Concepts](#core-concepts)  
+3. [System Architecture](#system-architecture)  
+4. [Getting Started](#getting-started)  
+5. [Common Tasks & Commands](#common-tasks--commands)  
+6. [Best Practices](#best-practices)  
+7. [Troubleshooting](#troubleshooting)  
+8. [References & Further Reading](#references--further-reading)  
+
+---
+
 ## Overview
-SensorHub is a Python-based sensor simulation dashboard that enables real-time generation, visualization, and recording of IoT sensor data. It supports multiple sensor types and integrates with MQTT for distributed architectures.
+SensorHub is a centralized platform for managing heterogeneous sensor data streams in AI-driven cyber‑physical systems. It provides:
+- Real‑time ingestion from edge devices
+- Unified metadata catalog
+- Flexible data routing & transformation
+- Built‑in analytics & visualization hooks
 
-## Features
-- **Sensor Management**: Add/remove various sensor types (Gaussian, Wave, Random Walk, LIDAR, Custom).
-- **Real-time Dashboard**: Live visualization using Chart.js with extensive data points.
-- **Background Data Generation**: Asynchronous, mathematically accurate sensor data generation.
-- **CSV Recording**: Continuous data recording to CSV files with timestamps.
-- **MQTT Integration**: Optional broker integration for publish/subscribe architectures.
-- **WebSocket API**: Real-time updates via WebSocket connections.
+## Core Concepts
+| Concept | Description |
+|---------|-------------|
+| **Sensor Node** | Physical or virtual device that publishes data to SensorHub. |
+| **Data Stream** | Named channel for a specific sensor or data type. |
+| **Handler** | Component that processes incoming data (e.g., parsing, validation). |
+| **Sink** | Destination for processed data (e.g., database, dashboard). |
 
-## Installation
-1. Clone the repository.
-2. Install dependencies: `pip install -r requirements.txt`.
-3. Run the application:
+## System Architecture
+```mermaid
+graph LR
+    A[Edge Sensors] -->|MQTT/UDP| B[SensorHub Ingress]
+    B --> C[Stream Processor]
+    C --> D[Storage Layer]
+    C --> E[Analytics Engine]
+    D --> F[Database]
+    E --> G[Visualization / Alerts]
+```
+
+## Getting Started
+1. **Install SensorHub CLI**  
    ```bash
-   python -m uvicorn app:app --reload --host 0.0.0.0 --port 8000
+   curl -sSL https:// sensorhub.example.com/install.sh | sh
    ```
-   or simply `python app.py`.
-4. Access the dashboard at `http://localhost:8000`.
+2. **Configure Access**  
+   ```bash
+   hub config set --endpoint https://sensorhub.example.com/api
+   hub config set --auth-token $SENSORHUB_TOKEN
+   ```
+3. **Verify Connection**  
+   ```bash
+   hub ping
+   ```
 
-## Usage
-### Adding Sensors
-- Fill out the "Add New Sensor" form with name, type, min/max values, interval, and parameters.
-- Click "Add Sensor".
+## Common Tasks & Commands
+### List Available Streams
+```bash
+hub streams list
+```
 
-### Controlling Sensors
-- Use "Start", "Stop", "Record", and "Delete" actions to control sensor behavior.
+### Publish Test Message
+```bash
+hub stream publish /temperature --payload '{"value": 23.5}'
+```
 
-### Recording Data
-- Click "Record" on a running sensor, then "Stop Recording" to finish. Download the CSV file.
+### Consume Stream (preview)
+```bash
+hub stream consume /temperature --count 5
+```
 
-### MQTT Setup
-- Enter broker details (hostname, port, topic prefix) and connect.
+### Configure a Handler
+```bash
+hub handler create temperature-processor --type python --script ./handlers/temp_processor.py
+```
 
-## Sensor Types
-- **Gaussian**: Normal distribution with configurable mean, std dev, drift.
-- **Wave**: Sine/cosine patterns with noise.
-- **Random Walk**: Brownian motion with trend.
-- **LIDAR**: Distance measurements with bounds checking.
-- **Custom**: User-defined patterns (linear, exponential, random).
+### Connect a Sink
+```bash
+hub sink attach temperature-processor --sink postgres://user:pass@db:5432/sensorhub
+```
 
-## API Endpoints
-- `POST /api/sensors` - Create sensor
-- `DELETE /api/sensors/{id}` - Delete sensor
-- `GET /api/sensors` - List sensors
-- `POST /api/sensors/{id}/start` - Start sensor
-- `POST /api/sensors/{id}/stop` - Stop sensor
-- `POST /api/recording/start/{id}` - Start CSV recording
-- `POST /api/recording/stop/{id}` - Stop recording
-- `GET /api/recordings/download/{filename}` - Download CSV
-- `POST /api/mqtt/connect` - Connect to MQTT
-- `POST /api/mqtt/disconnect` - Disconnect MQTT
+## Best Practices
+- **Namespace streams** with a clear hierarchy (e.g., `/device-id/sensor-name`).  
+- **Version your handler scripts**; use Git tags for rollback.  
+- **Enable authentication** on all ingress endpoints.  
+- **Monitor back‑pressure**: watch `hub metrics` for queue depth.  
 
-## Performance & Compatibility
-- Tested with 5+ simultaneous sensors.
-- In-memory storage (data cleared on restart).
-- Supports Chrome, Firefox, Safari, Edge.
+## Troubleshooting
+| Symptom | Likely Cause | Fix |
+|---------|--------------|-----|
+| No data received | Ingress endpoint unreachable | Check network/firewall; run `hub ping`. |
+| Invalid payload format | Handler expects different schema | Update handler script or adjust publisher. |
+| High latency | Queue buildup | Scale out processing resources; inspect `hub metrics`. |
 
-## License
-MIT
+## References & Further Reading
+- **SensorHub Documentation** – https://sensorhub.example.com/docs  
+- **Obsidian Plugin for SensorHub** – *SensorHub Notes* (install via Community Plugins).  
+- **Related Skills** – `sensorhub-management`, `repo-code-management`.  
+
+---
+
+> **Tip for Obsidian Users**: Save this file in your Vault’s `SensorHub/` folder. Enable the *Backlinks* and *Graph View* to visualize connections between streams, handlers, and sinks.

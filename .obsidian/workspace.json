@@ -4,11 +4,11 @@
     "type": "split",
     "children": [
       {
-        "id": "8b94ad2dc356d4ce",
+        "id": "8d8ccf8a513cde3a",
         "type": "tabs",
         "children": [
           {
-            "id": "b717edee8b472d2f",
+            "id": "4e59776adc2e6cb9",
             "type": "leaf",
             "state": {
               "type": "empty",
@@ -174,7 +174,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 507.5
+    "width": 398.5
   },
   "left-ribbon": {
     "hiddenItems": {
@@ -189,12 +189,32 @@
       "hermes-agent:Open Hermes smart graph": false
     }
   },
-  "active": "51cbb7cee73a91c4",
+  "active": "ea842f48fb4543cb",
   "lastOpenFiles": [
-    "study-guide/sensorhub-study-guide.md",
+    "study-guide/DecisionTrees/study-guide.md",
+    "study-guide/DecisionTrees",
+    "scripts/list_pinecone_indexes.py",
+    "study-guide/SimpleRegression/study-guide.md",
+    "study-guide/SimpleRegression",
+    "study-guide/README.md",
+    "study-guide/Python Basics/study-guide.md",
+    "study-guide/Python Basics",
+    "study-guide/PolinomialRegression/study-guide.md",
+    "study-guide/PolinomialRegression",
+    "study-guide/LogisticRegressionWithSensorData/study-guide.md",
+    "study-guide/LogisticRegressionWithSensorData",
+    "study-guide/LogisticRegression/study-guide.md",
+    "study-guide/LogisticRegression",
+    "study-guide/KNN/study-guide.md",
+    "study-guide/KNN",
+    "study-guide/KelmanFiltering/study-guide.md",
+    "study-guide/KelmanFiltering",
+    "study-guide/K-Means/study-guide.md",
+    "study-guide/K-Means",
+    "study-guide/FalseDataInjection/study-guide.md",
     "sensorhub/README.md",
+    "study-guide/sensorhub-study-guide.md",
     "Untitled.canvas",
-    "Untitled.base",
     "2026-07-19.md",
     "Welcome.md"
   ]

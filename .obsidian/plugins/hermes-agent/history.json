@@ -2,6 +2,22 @@
   "version": 1,
   "conversations": [
     {
+      "id": "tab-1784485576056-1",
+      "title": "create study-guide documents for every notebook, the file...",
+      "sessionId": "obs-1784485581350-278058d0-4af1-4206-8712-fa30c023a048",
+      "updatedAt": 1784486164400,
+      "messages": [
+        {
+          "role": "user",
+          "content": "create study-guide documents for every notebook, the files should be written in the study-guide directory"
+        },
+        {
+          "role": "assistant",
+          "content": "\n\nSuccessfully created the study‑guide documents for all notebooks.  \nThe `study-guide` directory now contains a subfolder for each notebook, each with a `study-guide.md` file.  \n\nHere are the generated files:\n\nstudy-guide/K-Means/study-guide.md\nstudy-guide/Python Basics/study-guide.md\nstudy-guide/PolinomialRegression/study-guide.md\nstudy-guide/KNN/study-guide.md\nstudy-guide/DecisionTrees/study-guide.md\nstudy-guide/LogisticRegressionWithSensorData/study-guide.md\nstudy-guide/LogisticRegression/study-guide.md\nstudy-guide/FalseDataInjection/study-guide.md\nstudy-guide/KelmanFiltering/study-guide.md\n\nLet me know if you need anything else."
+        }
+      ]
+    },
+    {
       "id": "tab-1784475329013-1",
       "title": "Analyse sensorhub and prepare me a study guide, showing 1...",
       "sessionId": "obs-1784475904511-bbb3ae32-0cb0-4f99-8050-4236e85c4cdf",
