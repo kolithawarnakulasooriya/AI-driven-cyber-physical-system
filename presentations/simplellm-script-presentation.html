@@ -1,368 +1,579 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>SimpleLLM Script Presentation</title>
-  <style>
-    :root {
-      --bg: #07121f;
-      --panel: #101c2d;
-      --panel-2: #17253a;
-      --text: #f5f7fb;
-      --muted: #9eb0c8;
-      --accent: #48cae4;
-      --accent-2: #7c4dff;
-      --accent-3: #00d4aa;
-      --border: rgba(255,255,255,0.14);
-    }
-    * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      font-family: Inter, "Segoe UI", Roboto, Arial, sans-serif;
-      background: radial-gradient(circle at top left, #14253e 0%, var(--bg) 45%, #050913 100%);
-      color: var(--text);
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      overflow: hidden;
-    }
-    .deck {
-      width: min(1420px, 96vw);
-      height: min(860px, 94vh);
-      position: relative;
-      border: 1px solid var(--border);
-      border-radius: 28px;
-      overflow: hidden;
-      box-shadow: 0 30px 90px rgba(0,0,0,0.35);
-      background: var(--panel);
-    }
-    .slide {
-      position: absolute;
-      inset: 0;
-      padding: 54px 62px 88px;
-      display: none;
-      flex-direction: column;
-      justify-content: center;
-      background: linear-gradient(135deg, rgba(255,255,255,0.04), transparent 60%);
-    }
-    .slide.active { display: flex; }
-    .eyebrow {
-      display: inline-block;
-      font-size: 0.78rem;
-      letter-spacing: 0.28em;
-      text-transform: uppercase;
-      color: var(--accent);
-      font-weight: 700;
-      margin-bottom: 10px;
-    }
-    h1, h2, h3 { margin: 0 0 12px; line-height: 1.12; }
-    h1 { font-size: clamp(2rem, 3.3vw, 2.8rem); }
-    h2 { font-size: clamp(1.5rem, 2.3vw, 2.15rem); }
-    h3 { font-size: 1.05rem; color: var(--accent); }
-    p, li { font-size: 1rem; line-height: 1.6; color: var(--muted); }
-    .hero { display: grid; grid-template-columns: 1.25fr 0.75fr; gap: 24px; align-items: center; }
-    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
-    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
-    .card {
-      background: rgba(255,255,255,0.045);
-      border: 1px solid var(--border);
-      border-radius: 18px;
-      padding: 18px 20px;
-      box-shadow: inset 0 1px 0 rgba(255,255,255,0.05);
-    }
-    .pill {
-      display: inline-block;
-      padding: 7px 11px;
-      border-radius: 999px;
-      background: rgba(72,202,228,0.16);
-      color: var(--accent);
-      font-weight: 700;
-      margin: 0 8px 8px 0;
-      font-size: 0.86rem;
-    }
-    .code {
-      font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
-      background: rgba(0,0,0,0.25);
-      border: 1px solid rgba(255,255,255,0.08);
-      border-radius: 12px;
-      padding: 14px 16px;
-      color: #98f6ff;
-      overflow-x: auto;
-      white-space: pre-wrap;
-      font-size: 0.9rem;
-      line-height: 1.5;
-    }
-    .image-wrap { display: flex; justify-content: center; margin-top: 8px; }
-    .image-wrap img { max-width: 100%; border-radius: 16px; border: 1px solid var(--border); }
-    .footer {
-      position: absolute;
-      left: 62px;
-      right: 62px;
-      bottom: 24px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      color: var(--muted);
-      font-size: 0.9rem;
-      border-top: 1px solid rgba(255,255,255,0.08);
-      padding-top: 12px;
-    }
-    .nav {
-      position: absolute;
-      right: 20px;
-      bottom: 18px;
-      display: flex;
-      gap: 10px;
-      z-index: 5;
-    }
-    .nav button {
-      background: rgba(255,255,255,0.08);
-      color: white;
-      border: 1px solid rgba(255,255,255,0.14);
-      border-radius: 999px;
-      padding: 10px 14px;
-      cursor: pointer;
-      font-size: 0.95rem;
-    }
-    .dots {
-      position: absolute;
-      left: 50%;
-      bottom: 24px;
-      transform: translateX(-50%);
-      display: flex;
-      gap: 8px;
-      z-index: 6;
-    }
-    .dots button {
-      width: 10px; height: 10px; border-radius: 999px; border: none; background: rgba(255,255,255,0.25); cursor: pointer;
-    }
-    .dots button.active { background: var(--accent); transform: scale(1.2); }
-    .counter {
-      position: absolute;
-      left: 24px; bottom: 20px; color: var(--muted); font-size: 0.85rem; z-index: 6;
-    }
-    @media (max-width: 980px) {
-      .hero, .grid-2, .grid-3 { grid-template-columns: 1fr; }
-      .slide { padding: 34px 24px 88px; }
-      .footer { left: 24px; right: 24px; }
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Decoder-Only GPT Architecture: PyTorch Analysis</title>
+    <style>
+        :root {
+            --bg-color: #0d1117;
+            --card-bg: #161b22;
+            --accent-blue: #58a6ff;
+            --accent-green: #3fb950;
+            --accent-red: #f85149;
+            --accent-purple: #bc8cff;
+            --text-main: #c9d1d9;
+            --text-heading: #ffffff;
+            --border-color: #30363d;
+            --code-bg: #0a0d12;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Top Bar Navigation */
+        header {
+            background-color: var(--card-bg);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .title-container h1 {
+            color: var(--text-heading);
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        .title-container p {
+            font-size: 0.85rem;
+            color: #8b949e;
+        }
+
+        .progress-container {
+            width: 250px;
+            background: var(--border-color);
+            height: 8px;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            width: 16.66%;
+            background: var(--accent-blue);
+            transition: width 0.3s ease;
+        }
+
+        /* Main Slide Viewport */
+        main {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+        }
+
+        .slide {
+            position: absolute;
+            width: 100%;
+            max-width: 1100px;
+            height: 85%;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            transform: translateX(50px);
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 2.5rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        .slide.active {
+            opacity: 1;
+            visibility: visible;
+            transform: translateX(0);
+        }
+
+        .slide-full {
+            grid-template-columns: 1fr;
+        }
+
+        /* Content Formatting */
+        .content-col {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            overflow-y: auto;
+            padding-right: 0.5rem;
+        }
+
+        .content-col h2 {
+            color: var(--accent-blue);
+            font-size: 1.6rem;
+            margin-bottom: 1rem;
+        }
+
+        .content-col h3 {
+            color: var(--text-heading);
+            font-size: 1.1rem;
+            margin: 1rem 0 0.5rem 0;
+        }
+
+        .content-col p, .content-col ul {
+            font-size: 0.95rem;
+            line-height: 1.6;
+            margin-bottom: 1rem;
+        }
+
+        .content-col ul {
+            list-style-position: inside;
+            padding-left: 0.5rem;
+        }
+
+        .content-col li {
+            margin-bottom: 0.5rem;
+        }
+
+        /* Code & Visual Blocks */
+        .code-container {
+            background: var(--code-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1rem;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.85rem;
+            overflow-x: auto;
+            color: #e6edf3;
+            white-space: pre;
+            line-height: 1.4;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            margin-right: 0.5rem;
+            text-transform: uppercase;
+        }
+
+        .badge-bug { background: rgba(248, 81, 73, 0.2); color: var(--accent-red); border: 1px solid var(--accent-red); }
+        .badge-fix { background: rgba(63, 185, 80, 0.2); color: var(--accent-green); border: 1px solid var(--accent-green); }
+        .badge-info { background: rgba(88, 166, 255, 0.2); color: var(--accent-blue); border: 1px solid var(--accent-blue); }
+
+        .diagram-box {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px dashed var(--border-color);
+            border-radius: 8px;
+            padding: 1.5rem;
+            text-align: center;
+        }
+
+        .diagram-box svg {
+            max-width: 100%;
+            height: auto;
+        }
+
+        /* Bottom Controls */
+        footer {
+            background-color: var(--card-bg);
+            border-top: 1px solid var(--border-color);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 1rem;
+        }
+
+        button {
+            background: var(--border-color);
+            color: var(--text-heading);
+            border: none;
+            padding: 0.6rem 1.2rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background 0.2s ease;
+        }
+
+        button:hover {
+            background: var(--accent-blue);
+            color: #ffffff;
+        }
+
+        button:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            background: var(--border-color);
+        }
+
+        .step-counter {
+            font-size: 0.9rem;
+            color: #8b949e;
+        }
+
+        /* Interactive Toggles */
+        .toggle-box {
+            margin-top: 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .toggle-header {
+            background: var(--border-color);
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 0.85rem;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .toggle-body {
+            padding: 1rem;
+            display: none;
+            background: var(--code-bg);
+        }
+
+        .toggle-box.open .toggle-body {
+            display: block;
+        }
+    </style>
 </head>
 <body>
-  <div class="deck">
-    <section class="slide active">
-      <div class="hero">
-        <div>
-          <div class="eyebrow">Step-by-step guide</div>
-          <h1>SimpleLLM in one visual story</h1>
-          <p>This deck explains the Python script block by block, so anyone can understand how a tiny GPT-like model is built, trained, and used to generate text.</p>
-          <div style="margin-top: 16px;">
-            <span class="pill">PyTorch</span><span class="pill">Transformer</span><span class="pill">Attention</span><span class="pill">Generation</span>
-          </div>
+
+    <header>
+        <div class="title-container">
+            <h1>Simple GPT Architecture</h1>
+            <p>Step-by-Step Code</p>
         </div>
-        <div class="card">
-          <h3>What you will learn</h3>
-          <ul>
-            <li>How text becomes tensors</li>
-            <li>How attention works</li>
-            <li>How the model is trained</li>
-            <li>How it writes new text</li>
-          </ul>
+        <div class="progress-container">
+            <div class="progress-bar" id="progressBar"></div>
         </div>
-      </div>
-      <div class="footer"><span>SimpleLLM</span><span>Start here</span></div>
-    </section>
+    </header>
 
-    <section class="slide">
-      <div class="eyebrow">1. Setup</div>
-      <h2>Import libraries and choose the device</h2>
-      <p>The script starts by importing PyTorch and selecting GPU, MPS, or CPU automatically.</p>
-      <div class="code">import torch
-import torch.nn as nn
-from torch.nn import functional as F
+    <main>
+        <!-- Slide 1: High-Level Overview -->
+        <div class="slide active" id="slide-1">
+            <div class="content-col">
+                <div>
+                    <h2>1. High-Level Architecture Overview</h2>
+                    <p>The analyzed script implements a complete autoregressive language model inspired by OpenAI's GPT architecture and nanoGPT.</p>
+                    <h3>Core Execution Workflow:</h3>
+                    <ul>
+                        <li><b>Data Subsystem:</b> Subword tokenization via BERT tokenizer and custom PyTorch data loading batching.</li>
+                        <li><b>Attention Engine:</b> Causal single-head & multi-head self-attention mechanism.</li>
+                        <li><b>Transformer Blocks:</b> Stacked multi-head attention and feed-forward networks with residual skip connections.</li>
+                        <li><b>Inference & Generation:</b> Autoregressive loop with temperature scaling for context sampling.</li>
+                    </ul>
+                </div>
+                <div>
+                    <span class="badge badge-info">Overview</span>
+                    <span class="badge badge-info">PyTorch</span>
+                </div>
+            </div>
+            <div class="diagram-box">
+                <svg width="320" height="380" viewBox="0 0 320 380">
+                    <rect x="60" y="310" width="200" height="40" rx="6" fill="#30363d" stroke="#58a6ff" stroke-width="2"/>
+                    <text x="160" y="335" fill="#fff" text-anchor="middle" font-size="12">Token + Positional Embedding</text>
+                    
+                    <path d="M 160 310 L 160 280" stroke="#58a6ff" stroke-width="2" marker-end="url(#arrow)"/>
+                    
+                    <rect x="40" y="100" width="240" height="180" rx="8" fill="#161b22" stroke="#bc8cff" stroke-width="2" stroke-dasharray="4"/>
+                    <text x="50" y="120" fill="#bc8cff" font-size="10">Transformer Block (x N)</text>
 
-device = torch.device(
-    "cuda" if torch.cuda.is_available()
-    else "mps" if torch.backends.mps.is_available()
-    else "cpu"
-)</div>
-      <div class="card" style="margin-top: 16px;">
-        <h3>Why this matters</h3>
-        <p>It makes the code portable and ensures the model runs on whatever hardware is available.</p>
-      </div>
-      <div class="footer"><span>Setup</span><span>Slide 2</span></div>
-    </section>
+                    <rect x="60" y="130" width="200" height="40" rx="6" fill="#30363d"/>
+                    <text x="160" y="155" fill="#fff" text-anchor="middle" font-size="12">Multi-Head Attention</text>
 
-    <section class="slide">
-      <div class="eyebrow">2. Build a tiny dataset</div>
-      <h2>Convert characters into numbers</h2>
-      <div class="grid-2">
-        <div>
-          <p>The Dataset class creates a vocabulary of characters, maps them to integers, and turns raw text into tensors.</p>
-          <div class="code">class Dataset():
-    def __init__(self, data):
-        self.chars = sorted(list(set(self.data)))
-        self.stoi = {ch: i for i, ch in enumerate(self.chars)}
-        self.itos = {i: ch for i, ch in enumerate(self.chars)}
+                    <path d="M 160 170 L 160 200" stroke="#8b949e" stroke-width="2"/>
 
-    def encode(self, text):
-        return [self.stoi[c] for c in text]</div>
+                    <rect x="60" y="200" width="200" height="40" rx="6" fill="#30363d"/>
+                    <text x="160" y="225" fill="#fff" text-anchor="middle" font-size="12">Feed Forward Network</text>
+
+                    <path d="M 160 100 L 160 70" stroke="#3fb950" stroke-width="2"/>
+
+                    <rect x="60" y="30" width="200" height="40" rx="6" fill="#30363d" stroke="#3fb950" stroke-width="2"/>
+                    <text x="160" y="55" fill="#fff" text-anchor="middle" font-size="12">LM Head (Linear Classifier)</text>
+                </svg>
+            </div>
         </div>
-        <div class="image-wrap"><img src="images/simplellm-dataset.svg" alt="Dataset flow diagram" /></div>
-      </div>
-      <div class="footer"><span>Dataset</span><span>Slide 3</span></div>
-    </section>
 
-    <section class="slide">
-      <div class="eyebrow">3. Create training windows</div>
-      <h2>Each sample is a sequence of tokens</h2>
-      <p>The batch function builds input-output pairs such that the model learns to predict the next token in a window.</p>
-      <div class="code">x = torch.stack([data_set[i:i + block_size] for i in ix])
-y = torch.stack([data_set[i + 1:i + block_size + 1] for i in ix])</div>
-      <div class="card" style="margin-top: 14px;">
-        <h3>Visual idea</h3>
-        <p>Input: “To be, or” → Target: “o be, or ”</p>
-      </div>
-      <div class="footer"><span>Batches</span><span>Slide 4</span></div>
-    </section>
+        <!-- Slide 2: Data Loading & Tokenization -->
+        <div class="slide" id="slide-2">
+            <div class="content-col">
+                <div>
+                    <h2>2. Tokenization & Data Loader</h2>
+                    <p>The code uses standard BERT subwords for tokenization and extracts training/validation tensors on demand.</p>
+                    <h3>Data Split & Target Alignment:</h3>
+                    <ul>
+                        <li><b>Inputs (x):</b> Sequence block of context length <code>T</code> (e.g. 256 tokens).</li>
+                        <li><b>Targets (y):</b> Identical sequence shifted 1 position right ($y_t = x_{t+1}$).</li>
+                    </ul>
+                </div>
+                <div class="code-container">
+class TokenizeDataLoader:
+    def get_batch(self, split='train', batch_size=4, block_size=256):
+        data_set = self.train_data if split == 'train' else self.val_data
+        
+        # Random starting index selection
+        max_idx = max(1, len(data_set) - block_size)
+        ix = torch.randint(0, max_idx, (batch_size,))
 
-    <section class="slide">
-      <div class="eyebrow">4. Attention head</div>
-      <h2>Self-attention lets the model look back at context</h2>
-      <div class="grid-2">
-        <div>
-          <p>Every token creates queries, keys, and values. The model compares them to figure out which earlier tokens matter most.</p>
-          <div class="code">wei = q @ k.transpose(-2, -1) * (C ** -0.5)
-wei = wei.masked_fill(self.tril[:T, :T] == 0, float('-inf'))
-wei = F.softmax(wei, dim=-1)</div>
-        </div>
-        <div class="image-wrap"><img src="images/simplellm-attention.svg" alt="Attention mechanism diagram" /></div>
-      </div>
-      <div class="footer"><span>Attention</span><span>Slide 5</span></div>
-    </section>
+        # Shift target by 1 token to right
+        x = torch.stack([data_set[i:i + block_size] for i in ix])
+        y = torch.stack([data_set[i + 1:i + block_size + 1] for i in ix])
 
-    <section class="slide">
-      <div class="eyebrow">5. Building the transformer</div>
-      <h2>Stacks of blocks make the model deeper</h2>
-      <div class="grid-2">
-        <div class="card">
-          <h3>Multi-head attention</h3>
-          <p>Several heads learn different patterns in parallel.</p>
+        return x.to(self.device), y.to(self.device)</div>
+            </div>
+            <div class="diagram-box">
+                <h3>Target Alignment Visualizer</h3>
+                <svg width="300" height="180" viewBox="0 0 300 180" style="margin-top: 10px;">
+                    <!-- Sequence X -->
+                    <rect x="20" y="40" width="50" height="35" rx="4" fill="#30363d" stroke="#58a6ff"/>
+                    <text x="45" y="62" fill="#fff" text-anchor="middle" font-size="12">To</text>
+                    <rect x="80" y="40" width="50" height="35" rx="4" fill="#30363d" stroke="#58a6ff"/>
+                    <text x="105" y="62" fill="#fff" text-anchor="middle" font-size="12">be</text>
+                    <rect x="140" y="40" width="50" height="35" rx="4" fill="#30363d" stroke="#58a6ff"/>
+                    <text x="165" y="62" fill="#fff" text-anchor="middle" font-size="12">,</text>
+                    <text x="10" y="25" fill="#58a6ff" font-size="11">Input (X)</text>
+
+                    <!-- Sequence Y -->
+                    <rect x="80" y="110" width="50" height="35" rx="4" fill="#30363d" stroke="#3fb950"/>
+                    <text x="105" y="132" fill="#fff" text-anchor="middle" font-size="12">be</text>
+                    <rect x="140" y="110" width="50" height="35" rx="4" fill="#30363d" stroke="#3fb950"/>
+                    <text x="165" y="132" fill="#fff" text-anchor="middle" font-size="12">,</text>
+                    <rect x="200" y="110" width="50" height="35" rx="4" fill="#30363d" stroke="#3fb950"/>
+                    <text x="225" y="132" fill="#fff" text-anchor="middle" font-size="12">or</text>
+                    <text x="10" y="100" fill="#3fb950" font-size="11">Target (Y)</text>
+
+                    <!-- Shift Arrow -->
+                    <path d="M 45 75 L 105 110" stroke="#f85149" stroke-width="1.5" stroke-dasharray="3"/>
+                </svg>
+            </div>
         </div>
-        <div class="card">
-          <h3>Feed-forward network</h3>
-          <p>Each block adds a small dense transformation to refine the representation.</p>
+
+        <!-- Slide 3: Single Attention Head -->
+        <div class="slide" id="slide-3">
+            <div class="content-col">
+                <div>
+                    <h2>3. Single Causal Attention Head</h2>
+                    <p>Calculates scaled dot-product attention with causal mask to prevent attending to future tokens.</p>
+                    <span class="badge badge-bug">Scaling Bug Discovered</span>
+                </div>
+                <div class="toggle-box open">
+                    <div class="toggle-header">Code Analysis & Discovered Scaling Bug</div>
+                    <div class="toggle-body code-container">
+# Original implementation in ee.py
+def forward(self, x):
+    B, T, C = x.shape
+    k = self.key(x) 
+    q = self.query(x)
+
+    # BUG: Scaled using full embedding dimension C instead of head_size (d_k)
+    wei = q @ k.transpose(-2, -1) * (C**-0.5) 
+
+    # Causal Masking
+    wei = wei.masked_fill(self.tril[:T, :T] == 0, float('-inf')) 
+    wei = F.softmax(wei, dim=-1) 
+    out = wei @ self.value(x)
+    return out</div>
+                </div>
+            </div>
+            <div class="content-col">
+                <div class="diagram-box" style="height: 100%;">
+                    <h3>Bug Explanation & Fix</h3>
+                    <p style="margin-top: 10px;">In standard Multi-Head Attention, dot products are scaled by $\sqrt{d_k}$ (where $d_k = \frac{n_{\text{embd}}}{n_{\text{head}}}$), not $\sqrt{n_{\text{embd}}}$.</p>
+                    
+                    <div style="margin-top: 15px; text-align: left; width: 100%;">
+                        <p><span class="badge badge-bug">Incorrect</span> Scale = <code>C**-0.5</code></p>
+                        <p style="margin-top: 8px;"><span class="badge badge-fix">Correct</span> Scale = <code>(C // num_heads)**-0.5</code></p>
+                    </div>
+                </div>
+            </div>
         </div>
-      </div>
-      <div class="code" style="margin-top: 14px;">class Block(nn.Module):
+
+        <!-- Slide 4: Multi-Head Attention -->
+        <div class="slide" id="slide-4">
+            <div class="content-col">
+                <div>
+                    <h2>4. Multi-Head Attention Mechanism</h2>
+                    <p>Runs multiple single attention heads in parallel, enabling the model to jointly attend to information from different representation subspaces.</p>
+                </div>
+                <div class="code-container">
+class MultiHeadAttention(nn.Module):
+    def __init__(self, num_heads, head_size, n_embd, block_size, dropout):
+        super().__init__()
+        # Parallel Attention Heads
+        self.heads = nn.ModuleList([
+            Head(head_size, n_embd, block_size, dropout) 
+            for _ in range(num_heads)
+        ])
+        # Output Linear Projection
+        self.proj = nn.Linear(n_embd, n_embd)
+        self.dropout = nn.Dropout(dropout)
+
     def forward(self, x):
+        # Concatenate head outputs along channel dimension
+        out = torch.cat([h(x) for h in self.heads], dim=-1)
+        out = self.dropout(self.proj(out)) 
+        return out</div>
+            </div>
+            <div class="diagram-box">
+                <svg width="280" height="240" viewBox="0 0 280 240">
+                    <rect x="20" y="180" width="240" height="30" rx="4" fill="#30363d"/>
+                    <text x="140" y="200" fill="#fff" text-anchor="middle" font-size="11">Input Tensor (B, T, C)</text>
+
+                    <!-- 3 Heads -->
+                    <rect x="20" y="110" width="70" height="40" rx="4" fill="#bc8cff"/>
+                    <text x="55" y="134" fill="#000" text-anchor="middle" font-size="10" font-weight="bold">Head 1</text>
+
+                    <rect x="105" y="110" width="70" height="40" rx="4" fill="#bc8cff"/>
+                    <text x="140" y="134" fill="#000" text-anchor="middle" font-size="10" font-weight="bold">Head 2</text>
+
+                    <rect x="190" y="110" width="70" height="40" rx="4" fill="#bc8cff"/>
+                    <text x="225" y="134" fill="#000" text-anchor="middle" font-size="10" font-weight="bold">Head N</text>
+
+                    <!-- Concat Block -->
+                    <rect x="20" y="40" width="240" height="30" rx="4" fill="#58a6ff"/>
+                    <text x="140" y="60" fill="#fff" text-anchor="middle" font-size="11">Concat & Projection Linear Layer</text>
+                </svg>
+            </div>
+        </div>
+
+        <!-- Slide 5: Transformer Block & Pre-LN -->
+        <div class="slide" id="slide-5">
+            <div class="content-col">
+                <div>
+                    <h2>5. Transformer Block Architecture</h2>
+                    <p>Integrates attention mechanisms with Feed-Forward Neural Networks (FFN) and Layer Normalization.</p>
+                    <span class="badge badge-bug">LayerNorm Placement Fix</span>
+                </div>
+                <div class="code-container">
+class Block(nn.Module):
+    def __init__(self, n_embd, n_head, block_size, dropout):
+        super().__init__()
+        head_size = n_embd // n_head
+        self.sa = MultiHeadAttention(n_head, head_size, n_embd, block_size, dropout)
+        self.ln1 = nn.LayerNorm(n_embd)
+        self.ffwd = FeedForward(n_embd, dropout)
+        self.ln2 = nn.LayerNorm(n_embd)
+
+    def forward(self, x):
+        # Recommended Modern Pre-LN Standard:
         x = x + self.sa(self.ln1(x))
         x = x + self.ffwd(self.ln2(x))
         return x</div>
-      <div class="footer"><span>Transformer blocks</span><span>Slide 6</span></div>
-    </section>
-
-    <section class="slide">
-      <div class="eyebrow">6. The GPT-style model</div>
-      <h2>Token embeddings + positional embeddings + output head</h2>
-      <div class="code">self.token_embedding_table = nn.Embedding(vocab_size, n_embd)
-self.position_embedding_table = nn.Embedding(block_size, n_embd)
-self.blocks = nn.Sequential(*[Block(...)] )
-self.lm_head = nn.Linear(n_embd, vocab_size)</div>
-      <p>This is the core of the tiny language model: an embedding layer, transformer layers, and a final prediction layer.</p>
-      <div class="footer"><span>Model</span><span>Slide 7</span></div>
-    </section>
-
-    <section class="slide">
-      <div class="eyebrow">7. Train the model</div>
-      <h2>Predict the next token and update weights</h2>
-      <div class="code">for iter in range(max_iters):
-    xb, yb = dataset.get_batch('train', batch_size=32, block_size=64)
-    logits, loss = model(xb, yb)
-    optimizer.zero_grad(set_to_none=True)
-    loss.backward()
-    optimizer.step()</div>
-      <div class="card" style="margin-top: 14px;">
-        <h3>What the loss does</h3>
-        <p>Cross-entropy measures how far the predicted distribution is from the true next token. Lower loss means better predictions.</p>
-      </div>
-      <div class="footer"><span>Training loop</span><span>Slide 8</span></div>
-    </section>
-
-    <section class="slide">
-      <div class="eyebrow">8. Generate text</div>
-      <h2>Use the trained model to write new text</h2>
-      <div class="grid-2">
-        <div>
-          <div class="code">context = torch.zeros((1, 1), dtype=torch.long, device=device)
-generated_tokens = model.generate(context, max_new_tokens=60)</div>
-          <p>The model samples one token at a time and appends it to the current sequence.</p>
+            </div>
+            <div class="diagram-box">
+                <h3>Pre-LN vs Post-LN Architecture</h3>
+                <p style="font-size: 0.85rem; margin-top: 10px; color: #8b949e;">Modern GPT models (including GPT-2/3/4) place <b>LayerNorm before</b> the attention block and feedforward block (Pre-LN) for improved gradient stability during training.</p>
+            </div>
         </div>
-        <div class="image-wrap"><img src="images/simplellm-generation.svg" alt="Text generation flow" /></div>
-      </div>
-      <div class="footer"><span>Generation</span><span>Slide 9</span></div>
-    </section>
 
-    <section class="slide">
-      <div class="eyebrow">9. Summary</div>
-      <h2>Why this notebook is powerful</h2>
-      <div class="grid-3">
-        <div class="card">
-          <h3>1. Tokenization</h3>
-          <p>Text becomes machine-readable tokens.</p>
+        <!-- Slide 6: Model Evaluation & Generation -->
+        <div class="slide" id="slide-6">
+            <div class="content-col">
+                <div>
+                    <h2>6. Full Model & Generation Inference</h2>
+                    <p>Constructs full GPT model, handles training metrics, and performs autoregressive sampling.</p>
+                    <span class="badge badge-bug">Weight Loading Bug</span>
+                </div>
+                <div class="code-container">
+# Load state dict correctly into initialized model instance:
+inference_mode = torch.load('simple_gpt.pth', map_location=device)
+model.load_state_dict(inference_mode)
+
+# Generation Loop
+def generate(self, idx, max_new_tokens, temperature=1.0):
+    for _ in range(max_new_tokens):
+        idx_cond = idx[:, -self.block_size:] # Crop context
+        logits, _ = self(idx_cond)
+        logits = logits[:, -1, :] / temperature
+        probs = F.softmax(logits, dim=-1)
+        idx_next = torch.multinomial(probs, num_samples=1)
+        idx = torch.cat((idx, idx_next), dim=1)
+    return idx</div>
+            </div>
+            <div class="diagram-box">
+                <h3>Inference Best Practices</h3>
+                <ul style="text-align: left; font-size: 0.85rem; margin-top: 10px;">
+                    <li><b>Temperature Scaling:</b> Lower temperatures ($< 0.7$) yield deterministic outputs; higher values yield creative text.</li>
+                    <li><b>State Loading:</b> Ensure weights loaded via <code>torch.load()</code> are properly populated into the target model instance via <code>load_state_dict()</code>.</li>
+                </ul>
+            </div>
         </div>
-        <div class="card">
-          <h3>2. Attention</h3>
-          <p>The model learns which context matters most.</p>
+
+    </main>
+
+    <footer>
+        <div class="step-counter" id="stepCounter">Slide 1 of 6</div>
+        <div class="btn-group">
+            <button id="prevBtn" onclick="changeSlide(-1)" disabled>Previous</button>
+            <button id="nextBtn" onclick="changeSlide(1)">Next</button>
         </div>
-        <div class="card">
-          <h3>3. Training</h3>
-          <p>It improves by predicting the next token better each step.</p>
-        </div>
-      </div>
-      <div class="card" style="margin-top: 16px;"><p>This is the same core idea used by large language models, just in a much smaller and easier-to-understand form.</p></div>
-      <div class="footer"><span>Takeaway</span><span>Slide 10</span></div>
-    </section>
+    </footer>
 
-    <div class="counter" id="counter">1 / 10</div>
-    <div class="dots" id="dots"></div>
-    <div class="nav">
-      <button onclick="prevSlide()">← Prev</button>
-      <button onclick="nextSlide()">Next →</button>
-    </div>
-  </div>
+    <script>
+        let currentSlide = 1;
+        const totalSlides = 6;
 
-  <script>
-    const slides = Array.from(document.querySelectorAll('.slide'));
-    const dotsContainer = document.getElementById('dots');
-    let index = 0;
+        function updateSlide() {
+            document.querySelectorAll('.slide').forEach((slide, index) => {
+                slide.classList.remove('active');
+                if (index === currentSlide - 1) {
+                    slide.classList.add('active');
+                }
+            });
 
-    slides.forEach((_, i) => {
-      const dot = document.createElement('button');
-      dot.addEventListener('click', () => showSlide(i));
-      dotsContainer.appendChild(dot);
-    });
+            // Update Progress Bar
+            const progress = (currentSlide / totalSlides) * 100;
+            document.getElementById('progressBar').style.width = progress + '%';
 
-    const dots = Array.from(dotsContainer.children);
+            // Update Counter
+            document.getElementById('stepCounter').innerText = `Slide ${currentSlide} of ${totalSlides}`;
 
-    function showSlide(i) {
-      index = (i + slides.length) % slides.length;
-      slides.forEach((slide, slideIndex) => slide.classList.toggle('active', slideIndex === index));
-      dots.forEach((dot, dotIndex) => dot.classList.toggle('active', dotIndex === index));
-      document.getElementById('counter').textContent = `${index + 1} / ${slides.length}`;
-    }
+            // Update Button State
+            document.getElementById('prevBtn').disabled = (currentSlide === 1);
+            document.getElementById('nextBtn').disabled = (currentSlide === totalSlides);
+        }
 
-    function nextSlide() { showSlide(index + 1); }
-    function prevSlide() { showSlide(index - 1); }
+        function changeSlide(direction) {
+            currentSlide += direction;
+            if (currentSlide < 1) currentSlide = 1;
+            if (currentSlide > totalSlides) currentSlide = totalSlides;
+            updateSlide();
+        }
 
-    document.addEventListener('keydown', (event) => {
-      if (event.key === 'ArrowRight' || event.key === ' ') nextSlide();
-      if (event.key === 'ArrowLeft') prevSlide();
-    });
-
-    showSlide(0);
-  </script>
+        // Keyboard Navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === 'Space') {
+                if (currentSlide < totalSlides) changeSlide(1);
+            } else if (e.key === 'ArrowLeft') {
+                if (currentSlide > 1) changeSlide(-1);
+            }
+        });
+    </script>
 </body>
 </html>

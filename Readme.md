@@ -47,3 +47,4 @@ cd sensorhub && python -m uvicorn app:app --reload
 - [2. Sensors](https://html-preview.github.io/?url=https://github.com/kolithawarnakulasooriya/AI-driven-cyber-physical-system/blob/main/presentations/sensors-cps.html)
 - [3. Kemlan Filtering](https://html-preview.github.io/?url=https://github.com/kolithawarnakulasooriya/AI-driven-cyber-physical-system/blob/main/presentations/kelman-filter-cps.html)
 - [4. Machine Learning](https://htmlpreview.github.io/?https://github.com/kolithawarnakulasooriya/AI-driven-cyber-physical-system/blob/main/presentations/machine-learning-cps.html)
+- [5. Simple LLM](https://htmlpreview.github.io/?https://github.com/kolithawarnakulasooriya/AI-driven-cyber-physical-system/blob/main/presentations/simplellm-script-presentation.html)
