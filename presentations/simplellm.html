@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SimpleLLM Presentation</title>
+  <style>
+    :root {
+      --bg: #07121f;
+      --panel: #101c2d;
+      --panel-2: #17253a;
+      --text: #f5f7fb;
+      --muted: #9eb0c8;
+      --accent: #48cae4;
+      --accent-2: #7c4dff;
+      --accent-3: #00d4aa;
+      --border: rgba(255,255,255,0.12);
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Inter, "Segoe UI", Roboto, Arial, sans-serif;
+      background: radial-gradient(circle at top left, #14253e 0%, var(--bg) 45%, #050913 100%);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .deck {
+      width: min(1400px, 96vw);
+      height: min(820px, 90vh);
+      position: relative;
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      overflow: hidden;
+      box-shadow: 0 24px 80px rgba(0,0,0,0.35);
+      background: var(--panel);
+    }
+
+    .slide {
+      position: absolute;
+      inset: 0;
+      padding: 56px 64px 88px;
+      display: none;
+      flex-direction: column;
+      justify-content: center;
+      background: linear-gradient(135deg, rgba(255,255,255,0.04), transparent 65%);
+    }
+
+    .slide.active { display: flex; }
+
+    .eyebrow {
+      text-transform: uppercase;
+      letter-spacing: 0.28em;
+      font-size: 0.78rem;
+      color: var(--accent);
+      margin-bottom: 12px;
+      font-weight: 700;
+    }
+
+    h1, h2, h3 {
+      margin: 0 0 12px;
+      line-height: 1.1;
+    }
+
+    h1 { font-size: clamp(2rem, 3.2vw, 3rem); }
+    h2 { font-size: clamp(1.6rem, 2.3vw, 2.2rem); }
+    h3 { font-size: 1.1rem; color: var(--accent); }
+
+    p, li { font-size: 1.02rem; line-height: 1.6; color: var(--muted); }
+
+    .hero {
+      display: grid;
+      grid-template-columns: 1.3fr 0.8fr;
+      gap: 28px;
+      align-items: center;
+      height: 100%;
+    }
+
+    .card {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 20px 22px;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
+    }
+
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    .code {
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+      background: rgba(0,0,0,0.25);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 12px;
+      padding: 14px 16px;
+      color: #98f6ff;
+      overflow-x: auto;
+      white-space: pre-wrap;
+      font-size: 0.95rem;
+      line-height: 1.5;
+    }
+
+    .pill {
+      display: inline-block;
+      padding: 7px 12px;
+      border-radius: 999px;
+      background: rgba(72,202,228,0.16);
+      color: var(--accent);
+      font-weight: 600;
+      margin-right: 8px;
+      margin-bottom: 8px;
+      font-size: 0.9rem;
+    }
+
+    .equation {
+      font-size: 1.15rem;
+      color: #e9f6ff;
+      background: rgba(0,0,0,0.2);
+      border-left: 3px solid var(--accent);
+      padding: 12px 14px;
+      border-radius: 10px;
+      margin: 10px 0;
+    }
+
+    .footer {
+      position: absolute;
+      left: 64px;
+      right: 64px;
+      bottom: 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: var(--muted);
+      font-size: 0.9rem;
+      border-top: 1px solid rgba(255,255,255,0.08);
+      padding-top: 12px;
+    }
+
+    .nav {
+      position: absolute;
+      right: 24px;
+      bottom: 20px;
+      display: flex;
+      gap: 10px;
+      z-index: 5;
+    }
+
+    .nav button {
+      background: rgba(255,255,255,0.08);
+      color: white;
+      border: 1px solid rgba(255,255,255,0.14);
+      border-radius: 999px;
+      padding: 10px 14px;
+      cursor: pointer;
+      font-size: 0.95rem;
+    }
+
+    .nav button:hover { background: rgba(255,255,255,0.14); }
+
+    .slide-counter {
+      position: absolute;
+      left: 24px;
+      bottom: 22px;
+      color: var(--muted);
+      font-size: 0.85rem;
+    }
+
+    @media (max-width: 900px) {
+      .hero, .grid-2, .grid-3 { grid-template-columns: 1fr; }
+      .slide { padding: 36px 24px 76px; }
+      .footer { left: 24px; right: 24px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="deck">
+    <section class="slide active">
+      <div class="hero">
+        <div>
+          <div class="eyebrow">Notebook walkthrough</div>
+          <h1>SimpleLLM: Building a Tiny GPT from Scratch</h1>
+          <p>This presentation summarizes the core ideas behind the Python notebook that trains a character-level language model using PyTorch.</p>
+          <div style="margin-top: 16px;">
+            <span class="pill">PyTorch</span>
+            <span class="pill">Self-Attention</span>
+            <span class="pill">Transformer</span>
+            <span class="pill">Text Generation</span>
+          </div>
+        </div>
+        <div class="card">
+          <h3>Notebook highlights</h3>
+          <ul>
+            <li>Character tokenizer and dataset builder</li>
+            <li>Transformer-style attention blocks</li>
+            <li>Training loop with cross-entropy loss</li>
+            <li>Model saving and text generation</li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer"><span>AI-driven cyber-physical systems</span><span>SimpleLLM</span></div>
+    </section>
+
+    <section class="slide">
+      <div class="eyebrow">1. Goal</div>
+      <h2>Learn language structure from characters</h2>
+      <p>The notebook trains a small neural model to predict the next character in a text sequence. Instead of using a large pretrained model, it builds the network from scratch and learns patterns directly from the provided text.</p>
+      <div class="grid-2" style="margin-top: 20px;">
+        <div class="card">
+          <h3>What the model learns</h3>
+          <ul>
+            <li>Word-like patterns and punctuation</li>
+            <li>Repeated phrases and structure</li>
+            <li>Simple grammar and style</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>Why it is useful</h3>
+          <ul>
+            <li>Good for teaching transformer concepts</li>
+            <li>Shows how embeddings and attention work</li>
+            <li>Provides a foundation for larger models</li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer"><span>Goal</span><span>Slide 2</span></div>
+    </section>
+
+    <section class="slide">
+      <div class="eyebrow">2. Dataset and tokenization</div>
+      <h2>Characters become integers</h2>
+      <p>The Dataset class maps each unique character to an index and builds a vocabulary. This turns raw text into tensor values that the model can process.</p>
+      <div class="code">class Dataset():
+    def __init__(self, data):
+        self.chars = sorted(list(set(self.data)))
+        self.stoi = {ch: i for i, ch in enumerate(self.chars)}
+        self.itos = {i: ch for i, ch in enumerate(self.chars)}</n
+    def encode(self, text):
+        return [self.stoi[c] for c in text]</div>
+      <div class="footer"><span>Tokenization</span><span>Slide 3</span></div>
+    </section>
+
+    <section class="slide">
+      <div class="eyebrow">3. Attention mechanism</div>
+      <h2>Self-attention lets the model look at context</h2>
+      <p>Each token creates queries, keys, and values. Attention scores determine how much each earlier token should influence the current prediction.</p>
+      <div class="equation">Q = XWQ,  K = XWK,  V = XWV</div>
+      <div class="equation">Attention(Q, K, V) = softmax(QKᵀ / √dₖ) V</div>
+      <p>A causal mask ensures the model only attends to prior positions, which is essential for autoregressive generation.</p>
+      <div class="footer"><span>Attention</span><span>Slide 4</span></div>
+    </section>
+
+    <section class="slide">
+      <div class="eyebrow">4. Architecture</div>
+      <h2>Multiple heads and transformer blocks</h2>
+      <div class="grid-2" style="margin-top: 14px;">
+        <div class="card">
+          <h3>Multi-head attention</h3>
+          <p>Several attention heads run in parallel, each learning different relationships in the sequence.</p>
+        </div>
+        <div class="card">
+          <h3>Feed-forward layer</h3>
+          <p>After attention, a small dense network transforms the token representation further.</p>
+        </div>
+      </div>
+      <div class="card" style="margin-top: 16px;">
+        <h3>Block structure</h3>
+        <p>Each Transformer block combines self-attention, layer normalization, a feed-forward network, and residual connections.</p>
+      </div>
+      <div class="footer"><span>Architecture</span><span>Slide 5</span></div>
+    </section>
+
+    <section class="slide">
+      <div class="eyebrow">5. Training loop</div>
+      <h2>Predict the next token and learn from error</h2>
+      <p>Training batches are built as windows of characters, where the input sequence predicts the next token in the sequence. The output logits are compared with the target tokens using cross-entropy loss.</p>
+      <div class="code">xb, yb = dataset.get_batch('train', batch_size=32, block_size=64)
+logits, loss = model(xb, yb)
+optimizer.zero_grad(set_to_none=True)
+loss.backward()
+optimizer.step()</div>
+      <div class="footer"><span>Training</span><span>Slide 6</span></div>
+    </section>
+
+    <section class="slide">
+      <div class="eyebrow">6. Generation and saving</div>
+      <h2>From trained weights to text</h2>
+      <div class="grid-2">
+        <div class="card">
+          <h3>Save the model</h3>
+          <p>The trained weights are saved to disk so the model can be reused later.</p>
+          <div class="code">from pathlib import Path
+torch.save(model.state_dict(), f'{Path.cwd()}/../models/simple_gpt.pth')</div>
+        </div>
+        <div class="card">
+          <h3>Generate text</h3>
+          <p>Starting from a short context, the model repeatedly samples the next token and appends it to the sequence.</p>
+          <div class="code">context = torch.zeros((1, 1), dtype=torch.long, device=device)
+generated_tokens = model.generate(context, max_new_tokens=60)</div>
+        </div>
+      </div>
+      <div class="footer"><span>Generation</span><span>Slide 7</span></div>
+    </section>
+
+    <div class="slide-counter" id="slideCounter">1 / 7</div>
+    <div class="nav">
+      <button onclick="prevSlide()">← Prev</button>
+      <button onclick="nextSlide()">Next →</button>
+    </div>
+  </div>
+
+  <script>
+    const slides = Array.from(document.querySelectorAll('.slide'));
+    let current = 0;
+
+    function showSlide(index) {
+      current = (index + slides.length) % slides.length;
+      slides.forEach((slide, i) => slide.classList.toggle('active', i === current));
+      document.getElementById('slideCounter').textContent = `${current + 1} / ${slides.length}`;
+    }
+
+    function nextSlide() { showSlide(current + 1); }
+    function prevSlide() { showSlide(current - 1); }
+
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'ArrowRight' || event.key === ' ') nextSlide();
+      if (event.key === 'ArrowLeft') prevSlide();
+    });
+
+    showSlide(0);
+  </script>
+</body>
+</html>
