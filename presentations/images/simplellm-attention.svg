@@ -1,0 +1,17 @@
+<svg width="900" height="560" viewBox="0 0 900 560" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="900" height="560" rx="32" fill="#07121F"/>
+  <rect x="80" y="100" width="740" height="360" rx="24" fill="#101C2D" stroke="#2A3D57" stroke-width="2"/>
+  <circle cx="220" cy="220" r="48" fill="#48CAE4" fill-opacity="0.2" stroke="#48CAE4" stroke-width="3"/>
+  <circle cx="360" cy="220" r="48" fill="#7C4DFF" fill-opacity="0.2" stroke="#7C4DFF" stroke-width="3"/>
+  <circle cx="500" cy="220" r="48" fill="#00D4AA" fill-opacity="0.2" stroke="#00D4AA" stroke-width="3"/>
+  <text x="220" y="230" text-anchor="middle" fill="#F5F7FB" font-family="Segoe UI, Arial" font-size="24">Q</text>
+  <text x="360" y="230" text-anchor="middle" fill="#F5F7FB" font-family="Segoe UI, Arial" font-size="24">K</text>
+  <text x="500" y="230" text-anchor="middle" fill="#F5F7FB" font-family="Segoe UI, Arial" font-size="24">V</text>
+  <path d="M260 220H312" stroke="#48CAE4" stroke-width="4" stroke-linecap="round"/>
+  <path d="M408 220H452" stroke="#7C4DFF" stroke-width="4" stroke-linecap="round"/>
+  <rect x="560" y="160" width="200" height="120" rx="16" fill="#17253A" stroke="#48CAE4" stroke-width="2"/>
+  <text x="660" y="215" text-anchor="middle" fill="#F5F7FB" font-family="Segoe UI, Arial" font-size="24">Attention weights</text>
+  <path d="M548 220H560" stroke="#00D4AA" stroke-width="4" stroke-linecap="round"/>
+  <rect x="220" y="340" width="480" height="80" rx="16" fill="#0F253B" stroke="#35506D" stroke-width="2"/>
+  <text x="250" y="385" fill="#98F6FF" font-family="Consolas, monospace" font-size="20">softmax(QKᵀ / √dₖ) V</text>
+</svg>
